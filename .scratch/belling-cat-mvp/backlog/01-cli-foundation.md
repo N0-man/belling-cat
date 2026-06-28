@@ -2,7 +2,7 @@
 
 ## Status
 
-to-do
+done
 
 ## Parent
 
@@ -16,14 +16,14 @@ The CLI should validate command syntax, route valid commands to placeholder hand
 
 ## Acceptance criteria
 
-- [ ] ASCII art banner "Belling Cat" displays on application startup using Rich
-- [ ] Input prompt appears using Rich's prompt functionality
-- [ ] `/investigate <claim>` command parsed correctly, extracts claim text
-- [ ] `/save <report-name>` command parsed correctly, extracts report name
-- [ ] Invalid commands display helpful error messages with usage guidance
-- [ ] Command routing infrastructure in place (handlers can be stubbed/mocked)
-- [ ] Terminal styling uses Yachalk for colors where appropriate
-- [ ] Integration test verifies banner display and command parsing end-to-end
+- [x] ASCII art banner "Belling Cat" displays on application startup using Rich
+- [x] Input prompt appears using Rich's prompt functionality
+- [x] `/investigate <claim>` command parsed correctly, extracts claim text
+- [x] `/save <report-name>` command parsed correctly, extracts report name
+- [x] Invalid commands display helpful error messages with usage guidance
+- [x] Command routing infrastructure in place (handlers can be stubbed/mocked)
+- [x] Terminal styling uses Yachalk for colors where appropriate
+- [x] Integration test verifies banner display and command parsing end-to-end
 
 ## Blocked by
 
