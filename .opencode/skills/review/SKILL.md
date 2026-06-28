@@ -1,14 +1,13 @@
 ---
 name: review
-description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X".
+description: Review the changes since a fixed point along three axes — Standards (coding conventions), Spec (acceptance criteria), and Architecture (domain model, DDD layer placement, ADR compliance). Runs all three in parallel sub-agents and reports them side by side.
 ---
 
-Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
+Three-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
 - **Standards** — does the code conform to this repo's documented coding standards?
 - **Spec** — does the code faithfully implement the originating issue / PRD / spec?
-
-Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
+- **Architecture** — does the code respect the domain model, DDD layer boundaries, and ADRs?
 
 ## Process
 
@@ -33,7 +32,15 @@ Look for the originating spec, in this order:
 
 Anything in the repo that documents how code should be written, such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`.
 
-### 4. Spawn both sub-agents in parallel
+### 4. Identify the architecture sources
+
+- `CONTEXT.md` — domain glossary with DDD building block types
+- `docs/00-repo-structure.md` — layer layout and dependency rules
+- `docs/adr/` — all ADRs
+
+If none of these exist, the **Architecture** sub-agent will skip and report "no architecture sources available".
+
+### 5. Spawn all three sub-agents in parallel
 
 Send a single message with two `Agent` tool calls.
 
@@ -57,19 +64,26 @@ Sub-agent selection policy:
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 
-### 5. Aggregate
+**Architecture sub-agent prompt** — include:
 
-Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings — the two axes are deliberately separate (see _Why two axes_).
+- The diff command and commit list.
+- The paths to `CONTEXT.md`, `docs/00-repo-structure.md`, and `docs/adr/`.
+- The brief: "Report: (a) domain terms used with the wrong DDD building block type; (b) layer dependency rule violations (inner layer importing outer); (c) external I/O not behind a port; (d) ADR decisions contradicted by the diff. Cite the source for each finding. Under 400 words."
 
-End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
+If architecture sources are missing, skip this sub-agent and note it in the final report.
 
-Do not stage, commit, amend, or push as part of `/review`.
+### 6. Aggregate
 
-## Why two axes
+Present the three reports under `## Standards`, `## Spec`, and `## Architecture` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings — the axes are deliberately separate.
 
-A change can pass one axis and fail the other:
+End with a one-line summary: total findings per axis and the worst issue within each (if any).
 
-- Code that follows every standard but implements the wrong thing → **Standards pass, Spec fail.**
-- Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Standards fail.**
+## Why three axes
 
-Reporting them separately stops one axis from masking the other.
+Each axis catches failures the others miss:
+
+- Correct standard, wrong feature → **Standards pass, Spec fail**
+- Correct feature, messy code → **Spec pass, Standards fail**
+- Both clean, but a Value Object is making HTTP calls → **Architecture fail**
+
+Keeping them separate stops one axis from masking another.

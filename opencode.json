@@ -6,15 +6,19 @@
       "model": "github-copilot/claude-sonnet-4.5",
       "permission": {
         "edit": "allow",
-        "bash": "allow"
+        "bash": {
+          "*": "allow"
+        }
       }
     },
     "plan": {
       "mode": "primary",
-      "model": "github-copilot/claude-haiku-4.5",
+      "model": "github-copilot/claude-sonnet-4.5",
       "permission": {
         "edit": "allow",
-        "bash": "deny"
+        "bash": {
+          "*": "allow"
+        }
       }
     },
     "code-reviewer": {
@@ -24,7 +28,9 @@
       "prompt": "You are a code reviewer. Focus on security, performance, and maintainability.",
       "permission": {
         "edit": "deny",
-        "bash": "allow"
+        "bash": {
+          "*": "allow"
+        }
       }
     }
   },
@@ -35,6 +41,7 @@
     "glob": "allow",
     "list": "allow",
     "edit": "ask",
+    "todowrite": "allow",
     "webfetch": "deny",
     "skill": {
       "*": "allow"

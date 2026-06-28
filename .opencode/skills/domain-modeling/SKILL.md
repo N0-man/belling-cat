@@ -21,6 +21,32 @@ When the user uses a term that conflicts with the existing language in `CONTEXT.
 
 When the user uses vague or overloaded terms, propose a precise canonical term. "You're saying 'account' — do you mean the Customer or the User? Those are different things."
 
+### Classify each term into a DDD building block
+
+When a term is added to `CONTEXT.md`, also identify which tactical DDD pattern it maps to:
+
+| Building block | Characteristic |
+|---|---|
+| **Entity** | Has identity that persists over time; two instances with the same attributes are still distinct if their IDs differ |
+| **Value Object** | Defined entirely by its attributes; immutable; interchangeable if attributes match |
+| **Aggregate** | Cluster of entities/VOs treated as a unit; has a single Aggregate Root that controls access |
+| **Domain Service** | Stateless operation that belongs to the domain but doesn't naturally fit on an entity |
+| **Repository** | Abstraction over persistence for an aggregate — defined in the domain/application layer, implemented in infrastructure |
+| **Port** | Interface defined by the application layer for any external dependency (LLM, search, storage); concrete implementation lives in adapters |
+| **Application Service** | Orchestrates domain objects to fulfil a use case; no business logic of its own |
+
+Record the building block type alongside each term in `CONTEXT.md` (e.g., `**Claim** _(Aggregate Root)_:`).
+
+### Establish layer structure in docs/00-repo-structure.md
+
+When the domain model is sufficiently clear (aggregates, services, and ports identified), write or update `docs/00-repo-structure.md` to document:
+
+- The module layout that reflects the Clean Architecture layers for this project
+- Which layer each building block lives in
+- The dependency rule in force: inner layers must not import from outer layers
+
+Create this file lazily — only once there is enough model to make it meaningful. Update it whenever a new boundary, module, or port is introduced.
+
 ### Discuss concrete scenarios
 
 When domain relationships are being discussed, stress-test them with specific scenarios. Invent scenarios that probe edge cases and force the user to be precise about the boundaries between concepts.
@@ -28,6 +54,8 @@ When domain relationships are being discussed, stress-test them with specific sc
 ### Cross-reference with code
 
 When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible — which is right?"
+
+Also check layer violations: if a domain term's implementation lives in the wrong layer (e.g., a Value Object method making an HTTP call), flag it.
 
 ### Update CONTEXT.md inline
 
@@ -47,4 +75,4 @@ If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](
 
 ## When to stop
 
-End the session when the user signals they're done — "done", "looks good", "that's enough", or similar. Summarize: (1) terms added or changed in `CONTEXT.md`, (2) any ADRs created. Then stop.
+End the session when the user signals they're done — "done", "looks good", "that's enough", or similar. Summarize: (1) terms added or changed in `CONTEXT.md` with their building block types, (2) any updates to `docs/00-repo-structure.md`, (3) any ADRs created. Then stop.

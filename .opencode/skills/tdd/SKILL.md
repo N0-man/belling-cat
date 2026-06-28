@@ -46,15 +46,19 @@ When exploring the codebase, read `CONTEXT.md` (if it exists) so that test names
 
 Before writing any code:
 
-- [ ] Confirm with user what interface changes are needed
-- [ ] Confirm with user which behaviors to test (prioritize)
+- [ ] Identify the behaviors to test (not implementation steps)
 - [ ] Identify opportunities for deep modules (small interface, deep implementation) by reviewing existing module boundaries and keeping interfaces minimal
-- [ ] List the behaviors to test (not implementation steps)
-- [ ] Get user approval on the plan
+
+**If a backlog item was provided** (i.e., you were invoked from `/implement`): derive the interface and behaviors directly from the backlog item's acceptance criteria. Do not ask the user for confirmation unless it's ambiguous or incomplete — proceed to the Tracer Bullet step.
+
+**If no backlog item was provided** (i.e., direct `/tdd` invocation): ask the user to confirm the interface and prioritize behaviors before proceeding:
+- Confirm what interface changes are needed
+- Confirm which behaviors to test (prioritize)
+- Get user approval on the plan
 
 Ask: "What should the public interface look like? Which behaviors are most important to test?"
 
-**You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
+**testing scope** Focus testing effort on all critical paths, behaviors and various edge cases.
 
 ### 2. Tracer Bullet
 
@@ -85,12 +89,34 @@ Rules:
 
 ### 4. Refactor
 
-After all tests pass, look for refactor candidates:
+After all tests pass, refactor with two goals: clean code **and** correct layer placement.
+
+**Layer placement (check first):**
+
+Read `CONTEXT.md` and `docs/00-repo-structure.md` to confirm the expected layer boundaries for this project, then apply the Clean Architecture dependency rule: **dependencies must only point inward** — outer layers depend on inner layers, never the reverse.
+
+The standard layers from innermost to outermost:
+
+| Layer | Contains | Must not depend on |
+|---|---|---|
+| **Domain** | Entities, value objects, domain services, aggregates | Everything outside itself |
+| **Application** | Use cases, application services, port interfaces | Infrastructure, delivery |
+| **Adapters** | Concrete implementations of ports (LLM, DB, search, etc.) | Delivery layer |
+| **Delivery** | Entry points (CLI, API, UI) — wiring and I/O formatting only | Nothing domain-internal |
+
+For each piece of new code, ask:
+
+- **Which layer does it belong in?** Business rules → domain. Orchestration → application. External I/O → adapter. Entry point → delivery.
+- **Is the dependency rule satisfied?** If an inner layer imports from an outer layer, that is a violation — extract an interface (port) and invert the dependency.
+- **Is domain logic pure?** Domain objects must have zero I/O, no framework imports, no LLM calls.
+- **Are external concerns behind ports?** Any call to an LLM, database, file system, or network should cross an interface defined in the application layer and implemented in an adapter.
+- **Is the delivery layer thin?** It should only wire components together and translate between user I/O and application layer calls — no business logic.
+
+**Then apply standard refactors:**
 
 - [ ] Extract duplication
-- [ ] Deepen modules (move complexity behind simple interfaces)
+- [ ] Deepen modules — small interface, deep implementation
 - [ ] Apply SOLID principles where natural
-- [ ] Consider what new code reveals about existing code
 - [ ] Run tests after each refactor step
 
 **Never refactor while RED.** Get to GREEN first.
