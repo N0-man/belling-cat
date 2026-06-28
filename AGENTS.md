@@ -43,7 +43,7 @@ Skills live in `.opencode/skills/`, invoked via thin commands in `.opencode/comm
 | `/handoff`         | `handoff`         | Write `.scratch/handoff-context.md` mapped to current commit                    |
 | `/tdd`             | `tdd`             | One test → minimal code → pass → next test (never all tests first)              |
 | `/implement`       | (composite)       | Implement a single backlog item using TDD + self-review                         |
-| `/review`          | `review`          | Dual-axis review (Standards + Spec) using parallel sub-agents                   |
+| `/review`          | `review`          | Three-axis review (Standards + Spec + Arechitecture) using parallel sub-agents                   |
 | `/commit`          | `commit`          | Commit the current reviewed changes                                             |
 | `/lint`            | `lint`            | Auto-fix lint and formatting (Python + frontend), then confirm workspace is clean |
 | `/test-affected`   | `test-affected`   | Find and run tests affected by current changes (optional file path args)        |

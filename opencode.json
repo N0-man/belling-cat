@@ -44,6 +44,7 @@
     "todowrite": "allow",
     "webfetch": "deny",
     "lsp": "allow",
+    "task": "allow",
     "skill": {
       "*": "allow"
     },
