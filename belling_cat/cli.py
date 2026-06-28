@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 from rich.console import Console
 from rich.panel import Panel
+from rich.prompt import Prompt
 from rich.text import Text
 from yachalk import chalk
 
@@ -100,3 +101,54 @@ class CommandRouter:
             return self._handlers[command](args)
 
         return format_error_message(user_input)
+
+
+def get_default_router() -> CommandRouter:
+    """Create and configure the default command router with stub handlers.
+
+    Returns:
+        Configured CommandRouter instance
+    """
+    router = CommandRouter()
+
+    def investigate_handler(args: str) -> str:
+        return chalk.yellow(f"Investigation handler not yet implemented. Claim: {args}")
+
+    def save_handler(args: str) -> str:
+        return chalk.yellow(f"Save handler not yet implemented. Report name: {args}")
+
+    router.register("investigate", investigate_handler)
+    router.register("save", save_handler)
+
+    return router
+
+
+def run_app(
+    console: Console | None = None,
+    single_command: bool = False,
+    router: CommandRouter | None = None,
+) -> None:
+    """Run the Belling Cat application.
+
+    Args:
+        console: Optional Console instance for testing
+        single_command: If True, exit after one command (for testing)
+        router: Optional CommandRouter instance (uses default if not provided)
+    """
+    if console is None:
+        console = Console()
+
+    if router is None:
+        router = get_default_router()
+
+    # Display banner on startup
+    display_banner(console)
+
+    # Main command loop
+    while True:
+        user_input = Prompt.ask(style_prompt("Enter command"))
+        result = router.dispatch(user_input)
+        console.print(result)
+
+        if single_command:
+            break

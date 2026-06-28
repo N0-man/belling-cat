@@ -43,6 +43,7 @@
     "edit": "ask",
     "todowrite": "allow",
     "webfetch": "deny",
+    "lsp": "allow",
     "skill": {
       "*": "allow"
     },

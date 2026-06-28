@@ -51,6 +51,7 @@ All human-triggered commands run in **build mode** (`build` agent — full permi
 | Command            | Purpose                                                          |
 | ------------------ | ---------------------------------------------------------------- |
 | `/discover`        | Interview-driven requirements capture; produces glossary and ADRs |
+| `/domain-modeling` | Build domain model — classify DDD building blocks, write `CONTEXT.md` and `docs/00-repo-structure.md`, record ADRs |
 | `/create-prd`      | Synthesise conversation into `.scratch/<feature>/PRD.md`         |
 | `/create-backlog`  | Break PRD into backlog items under `.scratch/<feature>/backlog/` |
 | `/implement`       | Implement one backlog item using TDD + self-review               |
@@ -62,9 +63,9 @@ Called internally by other commands — do not invoke these directly.
 | Command            | Called by       | Purpose                                                         |
 | ------------------ | --------------- | --------------------------------------------------------------- |
 | `/grilling`        | `/discover`     | Socratic questioning to sharpen scope                           |
-| `/domain-modeling` | `/discover`     | Maintain `CONTEXT.md` glossary and `docs/adr/` decisions        |
+| `/domain-modeling` | `/discover`     | Called inline during discovery to capture terms as they emerge  |
 | `/tdd`             | `/implement`    | Red-green-refactor loop (one test at a time)                    |
-| `/review`          | `/implement`    | Dual-axis review — Standards and Spec — via parallel sub-agents |
+| `/review`          | `/implement`    | Three-axis review — Standards, Spec, and Architecture — via parallel sub-agents |
 | `/test-affected`   | `/implement`    | Run only the tests affected by current changes                  |
 | `/commit`          | `/implement`    | Stage and commit reviewed changes                               |
 | `/preflight`       | `/implement`, `/commit` | Full CI-equivalent checks before committing or pushing  |

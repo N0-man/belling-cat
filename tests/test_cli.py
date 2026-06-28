@@ -119,3 +119,117 @@ def test_end_to_end_cli_flow():
 
     assert "Starting investigation" in result
     assert investigation_result == "flying elephant at Changi Airport"
+
+
+def test_app_startup_displays_banner():
+    """Verify application startup displays banner when run."""
+    from unittest.mock import patch
+
+    from belling_cat.cli import run_app
+
+    # Mock the prompt to avoid blocking
+    with patch("belling_cat.cli.Prompt.ask", return_value="/quit"):
+        console_output = StringIO()
+        console = Console(file=console_output, width=80, legacy_windows=False)
+
+        # Run app with single iteration (quit immediately)
+        run_app(console=console, single_command=True)
+
+        output = console_output.getvalue()
+        assert "Belling Cat" in output
+
+
+def test_app_accepts_and_processes_investigate_command():
+    """Verify app can accept and process /investigate command through prompt."""
+    from unittest.mock import patch
+
+    from belling_cat.cli import CommandRouter, run_app
+
+    console_output = StringIO()
+    console = Console(file=console_output, width=80, legacy_windows=False)
+
+    # Track whether handler was called
+    handler_called = []
+
+    def mock_investigate_handler(args: str) -> str:
+        handler_called.append(args)
+        return f"Investigation started: {args}"
+
+    # Mock prompt to return an investigate command
+    with patch("belling_cat.cli.Prompt.ask", return_value="/investigate test claim"):
+        with patch("belling_cat.cli.get_default_router") as mock_router:
+            router = CommandRouter()
+            router.register("investigate", mock_investigate_handler)
+            mock_router.return_value = router
+
+            run_app(console=console, single_command=True)
+
+            # Verify handler was called with correct args
+            assert handler_called == ["test claim"]
+
+            output = console_output.getvalue()
+            assert "Investigation started: test claim" in output
+
+
+def test_module_entry_point_exists():
+    """Verify the application can be run as a Python module."""
+    import subprocess
+
+    # Run the module - should not fail with "No module named __main__"
+    result = subprocess.run(
+        ["python", "-m", "belling_cat", "--version"],
+        capture_output=True,
+        text=True,
+        timeout=2,
+    )
+
+    # Should not have the "No module named __main__" error
+    assert "No module named" not in result.stderr
+    assert "__main__" not in result.stderr or "cannot be directly executed" not in result.stderr
+
+
+def test_app_processes_save_command():
+    """Verify app can accept and process /save command through prompt."""
+    from unittest.mock import patch
+
+    from belling_cat.cli import CommandRouter, run_app
+
+    console_output = StringIO()
+    console = Console(file=console_output, width=80, legacy_windows=False)
+
+    # Track whether handler was called
+    handler_called = []
+
+    def mock_save_handler(args: str) -> str:
+        handler_called.append(args)
+        return f"Report saved: {args}"
+
+    with patch("belling_cat.cli.Prompt.ask", return_value="/save test-report"):
+        with patch("belling_cat.cli.get_default_router") as mock_router:
+            router = CommandRouter()
+            router.register("save", mock_save_handler)
+            mock_router.return_value = router
+
+            run_app(console=console, single_command=True)
+
+            assert handler_called == ["test-report"]
+            output = console_output.getvalue()
+            assert "Report saved: test-report" in output
+
+
+def test_app_handles_invalid_command():
+    """Verify app displays error message for invalid commands."""
+    from unittest.mock import patch
+
+    from belling_cat.cli import run_app
+
+    console_output = StringIO()
+    console = Console(file=console_output, width=80, legacy_windows=False)
+
+    with patch("belling_cat.cli.Prompt.ask", return_value="/invalid something"):
+        run_app(console=console, single_command=True)
+
+        output = console_output.getvalue()
+        assert "Unknown command" in output
+        assert "/investigate" in output  # Should show usage guidance
+        assert "/save" in output  # Should show usage guidance

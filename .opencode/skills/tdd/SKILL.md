@@ -65,68 +65,60 @@ Ask: "What should the public interface look like? Which behaviors are most impor
 Write ONE test that confirms ONE thing about the system:
 
 ```
-RED:   Write test for first behavior → test fails
-GREEN: Write minimal code to pass → test passes
+RED:      Write test for first behavior → test fails
+GREEN:    Write minimal code to pass → test passes
+REFACTOR: Clean up and check layer placement → tests still pass
 ```
 
-This is your tracer bullet - proves the path works end-to-end.
+This is your tracer bullet — proves the path works end-to-end.
 
 ### 3. Incremental Loop
 
-For each remaining behavior:
+Each cycle is a complete **RED → GREEN → REFACTOR**. Never skip REFACTOR to get to the next test — that is how drift and layer violations accumulate.
 
 ```
-RED:   Write next test → fails
-GREEN: Minimal code to pass → passes
+RED:      Write next failing test
+GREEN:    Minimal code to pass
+REFACTOR: Clean before moving on
 ```
 
-Rules:
+**REFACTOR checklist (run after every GREEN):**
 
-- One test at a time
-- Only enough code to pass current test
-- Don't anticipate future tests
-- Keep tests focused on observable behavior
+_Layer placement — check first:_
 
-### 4. Refactor
-
-After all tests pass, refactor with two goals: clean code **and** correct layer placement.
-
-**Layer placement (check first):**
-
-Read `CONTEXT.md` and `docs/00-repo-structure.md` to confirm the expected layer boundaries for this project, then apply the Clean Architecture dependency rule: **dependencies must only point inward** — outer layers depend on inner layers, never the reverse.
-
-The standard layers from innermost to outermost:
+Read `CONTEXT.md` and `docs/00-repo-structure.md` for the layer boundaries, then apply the Clean Architecture dependency rule: **dependencies point inward only**.
 
 | Layer | Contains | Must not depend on |
 |---|---|---|
 | **Domain** | Entities, value objects, domain services, aggregates | Everything outside itself |
 | **Application** | Use cases, application services, port interfaces | Infrastructure, delivery |
 | **Adapters** | Concrete implementations of ports (LLM, DB, search, etc.) | Delivery layer |
-| **Delivery** | Entry points (CLI, API, UI) — wiring and I/O formatting only | Nothing domain-internal |
+| **Delivery** | Entry points — wiring and I/O formatting only | Nothing domain-internal |
 
-For each piece of new code, ask:
+- Is this code in the right layer?
+- Does any inner layer import an outer layer? (violation — extract a port)
+- Is domain logic free of I/O, framework imports, and LLM calls?
+- Are external concerns behind a port?
+- Is the delivery layer doing nothing but wiring?
 
-- **Which layer does it belong in?** Business rules → domain. Orchestration → application. External I/O → adapter. Entry point → delivery.
-- **Is the dependency rule satisfied?** If an inner layer imports from an outer layer, that is a violation — extract an interface (port) and invert the dependency.
-- **Is domain logic pure?** Domain objects must have zero I/O, no framework imports, no LLM calls.
-- **Are external concerns behind ports?** Any call to an LLM, database, file system, or network should cross an interface defined in the application layer and implemented in an adapter.
-- **Is the delivery layer thin?** It should only wire components together and translate between user I/O and application layer calls — no business logic.
-
-**Then apply standard refactors:**
+_Then standard refactors:_
 
 - [ ] Extract duplication
 - [ ] Deepen modules — small interface, deep implementation
 - [ ] Apply SOLID principles where natural
 - [ ] Run tests after each refactor step
 
-**Never refactor while RED.** Get to GREEN first.
+**Never refactor while RED.** Get to GREEN first, then clean.
 
 ## Checklist Per Cycle
 
 ```
+[ ] RED:      Test fails for the right reason
+[ ] GREEN:    Minimal code only — no speculative additions
+[ ] REFACTOR: Layer placement verified
+[ ] REFACTOR: No duplication introduced
+[ ] REFACTOR: Tests still pass after refactor
 [ ] Test describes behavior, not implementation
 [ ] Test uses public interface only
 [ ] Test would survive internal refactor
-[ ] Code is minimal for this test
-[ ] No speculative features added
 ```
