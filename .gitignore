@@ -48,9 +48,6 @@ htmlcov/
 .session/
 .reports/
 
-# Scratch/planning files
-.scratch/
-
 # Node.js (legacy)
 node_modules
 package.json

@@ -8,7 +8,7 @@ This backlog tracks the implementation of the Belling Cat fact-checking terminal
 
 | Item ID | Title | Status | Blocked by | PRD | Item file |
 |---------|-------|--------|-----------|-----|-----------|
-| Item 00 | Scaffolding & Tech Stack Setup | to-do | None - can start immediately | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/00-scaffolding-tech-stack.md |
+| Item 00 | Scaffolding & Tech Stack Setup | done | None - can start immediately | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/00-scaffolding-tech-stack.md |
 | Item 01 | CLI Foundation & Command Parsing | to-do | Item 00 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/01-cli-foundation.md |
 | Item 02 | Claim Decomposition Agent | to-do | Item 01 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/02-claim-decomposition.md |
 | Item 03 | Investigation & Evidence Gathering | to-do | Item 02 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/03-investigation-evidence.md |
