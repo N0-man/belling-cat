@@ -45,3 +45,17 @@ class Finding:
     """
 
     message: str
+
+
+@dataclass(frozen=True)
+class Verdict:
+    """The final categorization of a claim's veracity.
+
+    Category: "Supported" (authoritative sources agree),
+              "Contradicted" (sources directly refute it),
+              or "Unsupported" (insufficient authoritative evidence).
+    """
+
+    subclaim: "SubClaim"
+    category: str  # "Supported", "Contradicted", or "Unsupported"
+    explanation: str

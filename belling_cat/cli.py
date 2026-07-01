@@ -8,6 +8,8 @@ from rich.prompt import Prompt
 from rich.text import Text
 from yachalk import chalk
 
+from belling_cat.domain.value_objects import Verdict
+
 
 def display_banner(console: Console) -> None:
     """Display the Belling Cat ASCII art banner."""
@@ -63,6 +65,59 @@ def style_prompt(prompt_text: str) -> str:
         Styled prompt string with Yachalk colors
     """
     return chalk.cyan(f"{prompt_text}: ")
+
+
+def display_verdicts(
+    console: Console, verdicts: list[Verdict], contradictions: list[str] | None = None
+) -> None:
+    """Display verdicts using Rich panels with formatting.
+
+    Args:
+        console: Rich Console instance
+        verdicts: List of Verdict value objects to display
+        contradictions: Optional list of contradiction explanations to highlight
+    """
+    console.print("\n[bold cyan]Investigation Results:[/bold cyan]\n")
+
+    # Display each verdict in a panel
+    for verdict in verdicts:
+        # Choose color based on verdict category
+        if verdict.category == "Supported":
+            color = "green"
+            icon = "✓"
+        elif verdict.category == "Contradicted":
+            color = "red"
+            icon = "✗"
+        else:  # Unsupported
+            color = "yellow"
+            icon = "?"
+
+        title = f"[{color}]{icon} {verdict.category}[/{color}]"
+        content = f"[bold]Sub-claim:[/bold] {verdict.subclaim.text}\n\n"
+        content += f"[bold]Explanation:[/bold] {verdict.explanation}"
+
+        panel = Panel(content, title=title, border_style=color)
+        console.print(panel)
+
+    # Display contradictions if any
+    if contradictions and len(contradictions) > 0:
+        console.print("\n[bold yellow]⚠ Contradictions Detected:[/bold yellow]\n")
+        for i, contradiction in enumerate(contradictions, 1):
+            console.print(f"{i}. {contradiction}")
+
+
+def prompt_for_approval() -> bool:
+    """Prompt user for approval/acknowledgment.
+
+    Returns:
+        True if user approves, False otherwise
+    """
+    response = Prompt.ask(
+        "\n[bold cyan]Do you want to proceed with saving the report?[/bold cyan]",
+        choices=["yes", "no"],
+        default="yes",
+    )
+    return response.lower() == "yes"
 
 
 class CommandRouter:

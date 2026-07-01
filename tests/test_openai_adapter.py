@@ -105,6 +105,51 @@ class TestOpenAIAdapter:
         assert evidence[0].credibility == "news"
         assert len(findings) == 2
 
+    def test_adapter_verifies_claim_with_gpt4o(self) -> None:
+        """OpenAI adapter should use GPT-4o for verification with verdict generation."""
+        from belling_cat.domain.value_objects import Evidence, Source, SubClaim
+        from belling_cat.infrastructure.llm.openai_adapter import OpenAIAdapter
+
+        # Mock the OpenAI client
+        mock_client = Mock()
+        mock_response = Mock()
+        verdict_json = json.dumps(
+            {
+                "verdict": {
+                    "category": "Supported",
+                    "explanation": "Multiple authoritative sources confirm this claim",
+                    "confidence": "high",
+                },
+                "contradictions": [],
+            }
+        )
+        mock_response.choices = [Mock(message=Mock(content=verdict_json))]
+        mock_client.chat.completions.create.return_value = mock_response
+
+        adapter = OpenAIAdapter(client=mock_client)
+        subclaim = SubClaim(text="The sky is blue")
+        evidence = [
+            Evidence(
+                source=Source(
+                    url="https://nasa.gov/earth-sky-color",
+                    authority_level="government",
+                    publication_date="2024-01-01",
+                ),
+                quote="Atmospheric scattering causes sky to appear blue",
+                timestamp="2024-01-01T12:00:00Z",
+            )
+        ]
+
+        verdict, contradictions = adapter.verify_claim(subclaim, evidence)
+
+        # Verify the adapter called OpenAI with GPT-4o
+        mock_client.chat.completions.create.assert_called_once()
+        call_kwargs = mock_client.chat.completions.create.call_args.kwargs
+        assert call_kwargs["model"] == "gpt-4o"
+        assert verdict.category == "Supported"
+        assert verdict.confidence == "high"
+        assert len(contradictions) == 0
+
 
 class TestOpenAIAdapterIntegration:
     """End-to-end integration tests with real OpenAI API."""

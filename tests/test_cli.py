@@ -233,3 +233,80 @@ def test_app_handles_invalid_command():
         assert "Unknown command" in output
         assert "/investigate" in output  # Should show usage guidance
         assert "/save" in output  # Should show usage guidance
+
+
+def test_display_verdicts_formats_with_rich_panels():
+    """Verify verdicts are displayed as Rich panels with category and explanation."""
+    from belling_cat.cli import display_verdicts
+    from belling_cat.domain.value_objects import SubClaim, Verdict
+
+    console_output = StringIO()
+    console = Console(file=console_output, width=80, legacy_windows=False)
+
+    # Create test verdicts
+    verdicts = [
+        Verdict(
+            subclaim=SubClaim(text="The sky is blue"),
+            category="Supported",
+            explanation="Multiple authoritative sources confirm this claim",
+        ),
+        Verdict(
+            subclaim=SubClaim(text="The moon is made of cheese"),
+            category="Contradicted",
+            explanation="Scientific evidence contradicts this claim",
+        ),
+    ]
+
+    display_verdicts(console, verdicts)
+
+    output = console_output.getvalue()
+    assert "The sky is blue" in output
+    assert "Supported" in output
+    assert "Multiple authoritative sources" in output
+    assert "The moon is made of cheese" in output
+    assert "Contradicted" in output
+
+
+def test_display_verdicts_highlights_contradictions():
+    """Verify contradictions are highlighted in verdict display."""
+    from belling_cat.cli import display_verdicts
+    from belling_cat.domain.value_objects import SubClaim, Verdict
+
+    console_output = StringIO()
+    console = Console(file=console_output, width=80, legacy_windows=False)
+
+    # Create test verdicts with contradictions
+    verdicts = [
+        Verdict(
+            subclaim=SubClaim(text="Coffee is healthy"),
+            category="Unsupported",
+            explanation="Sources contradict each other",
+        )
+    ]
+    contradictions = [
+        "Source 1 states coffee has health benefits, while Source 2 suggests negative effects"
+    ]
+
+    display_verdicts(console, verdicts, contradictions)
+
+    output = console_output.getvalue()
+    assert "Coffee is healthy" in output
+    assert "Unsupported" in output
+    assert "contradictions" in output.lower() or "contradiction" in output.lower()
+
+
+def test_prompt_for_approval_returns_user_response():
+    """Verify user approval prompt returns user response."""
+    from unittest.mock import patch
+
+    from belling_cat.cli import prompt_for_approval
+
+    # Mock user input to return "yes"
+    with patch("belling_cat.cli.Prompt.ask", return_value="yes"):
+        result = prompt_for_approval()
+        assert result is True
+
+    # Mock user input to return "no"
+    with patch("belling_cat.cli.Prompt.ask", return_value="no"):
+        result = prompt_for_approval()
+        assert result is False

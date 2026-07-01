@@ -2,30 +2,31 @@
 
 ## Metadata
 
-- Generated at (UTC): 2026-07-01 22:33:31 UTC
-- Current HEAD: 3b3d6199e136e73ca0385035d5c4ba88ed9e25bf
-- Previous handoff HEAD: 6355406c41df3de592bbb8d1d3ad69fe68bfbb0b
-- Stale context detected: yes (previous handoff belonged to Item 02; Item 02 has since been completed and committed)
+- Generated at (UTC): 2026-07-01 22:55:32 UTC
+- Current HEAD: 0478df1b81f2fd04f888611a89eb30fc1ae0d4e5
+- Previous handoff HEAD: 3b3d6199e136e73ca0385035d5c4ba88ed9e25bf
+- Stale context detected: yes (previous handoff belonged to Item 03; Item 03 has since been completed and committed)
 
 ## Next-session focus
 
-Implementing **Item 03: Investigation & Evidence Gathering** using TDD. This is the second agent in the investigation pipeline, responsible for searching for evidence using GPT-4 Turbo with web search enabled, streaming real-time findings to the terminal.
+Implementing **Item 04: Verifier Agent & Verdict Display with User Approval** using TDD. This agent assesses source credibility, detects contradictions, and generates verdicts (Supported/Contradicted/Unsupported) for each sub-claim. After verdict generation, the system displays findings to the user and prompts for approval before proceeding to save.
 
 ## Current status
 
 - Item 00 (Scaffolding & Tech Stack Setup): `done`
 - Item 01 (CLI Foundation & Command Parsing): `done`
 - Item 02 (Claim Decomposition Agent): `done`
-- Item 03 (Investigation & Evidence Gathering): `to-do` and ready to implement (blocker Item 02 is done)
-- Starting TDD implementation: Investigation Agent with web search, Rich Live Display streaming, parallel sub-claim processing
+- Item 03 (Investigation & Evidence Gathering): `done`
+- Item 04 (Verifier Agent & Verdict Display with User Approval): `doing` (just started)
+- Starting TDD implementation: Verifier Agent with credibility hierarchy, contradiction detection, Rich panel display, user approval flow
 
 ## Open decisions and blockers
 
-None - Item 03 has clear acceptance criteria and no blockers.
+None - Item 04 has clear acceptance criteria and no blockers (Item 03 is done).
 
 ## Suggested next actions
 
-1. Load `/tdd` skill and implement Item 03 test-first
+1. Load `/tdd` skill and implement Item 04 test-first
 2. After each GREEN cycle, append one-line TDD log entry to this file under `## TDD Log` section
 3. Run typechecking regularly during development
 4. Self-review with `/review` using `main` as fixed point
@@ -42,7 +43,7 @@ None - Item 03 has clear acceptance criteria and no blockers.
 
 ## References
 
-- Backlog item: `.scratch/belling-cat-mvp/backlog/03-investigation-evidence.md`
+- Backlog item: `.scratch/belling-cat-mvp/backlog/04-verifier-verdict.md`
 - Backlog tracker: `.scratch/belling-cat-mvp/backlog.md`
 - PRD: `.scratch/belling-cat-mvp/PRD.md`
 - Domain model: `CONTEXT.md`
@@ -52,10 +53,10 @@ None - Item 03 has clear acceptance criteria and no blockers.
 ## TDD Log
 
 _(Entries appended after each GREEN cycle)_
-- [2026-07-01 22:35:58] GREEN: test_simple_subclaim_returns_evidence_with_source - Investigation service returns evidence with source URL, publication date, and quote
-- [2026-07-01 22:37:15] GREEN: test_multiple_sources_with_different_authority_levels - Investigation handles multiple evidence sources with different authority levels (government, academic, news)
-- [2026-07-01 22:37:39] GREEN: test_investigation_returns_findings_during_search - Investigation service returns findings (progress messages) along with evidence
-- [2026-07-01 22:40:27] GREEN: test_adapter_investigates_subclaim_with_gpt4 - OpenAI adapter implements investigate_subclaim using GPT-4 Turbo, returning RawEvidence and findings
-- [2026-07-01 22:42:38] GREEN: test_workflow_includes_investigation_node - LangGraph workflow includes investigation node that orchestrates evidence gathering for sub-claims
-- [2026-07-01 22:47:53] REFACTOR: Fixed architecture violations - Added timestamp to Evidence, moved RawEvidence to port layer for type safety
-
+- [2026-07-01 22:58:10] GREEN: test_supported_claim_returns_supported_verdict - VerifierService returns Supported verdict for sub-claim with supporting evidence
+- [2026-07-01 22:58:45] GREEN: test_contradicted_claim_returns_contradicted_verdict - VerifierService returns Contradicted verdict for contradicting evidence
+- [2026-07-01 22:59:03] GREEN: test_unsupported_claim_returns_unsupported_verdict - VerifierService returns Unsupported verdict for insufficient evidence
+- [2026-07-01 23:00:22] GREEN: test_contradicting_sources_detected_and_flagged - VerifierService detects and returns contradictions between sources
+- [2026-07-01 23:01:56] GREEN: test_adapter_verifies_claim_with_gpt4o - OpenAI adapter implements verify_claim using GPT-4o
+- [2026-07-01 23:03:44] GREEN: test_workflow_includes_verification_node - LangGraph workflow includes verification node for verdict generation
+- [2026-07-01 23:05:50] GREEN: test_display_verdicts_* + test_prompt_for_approval - CLI displays verdicts with Rich panels and prompts for user approval

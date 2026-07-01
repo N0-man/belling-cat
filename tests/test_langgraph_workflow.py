@@ -102,6 +102,77 @@ class TestLangGraphWorkflow:
         assert result["evidence"][0].source.url == "https://example.com"
         assert result["evidence"][0].quote == "Test evidence"
 
+    def test_workflow_includes_verification_node(self) -> None:
+        """Workflow should include a verification node that generates verdicts for sub-claims."""
+        from dataclasses import dataclass
+
+        from belling_cat.application.services.decomposition_service import (
+            DecompositionService,
+        )
+        from belling_cat.application.services.investigation_service import (
+            InvestigationService,
+        )
+        from belling_cat.application.services.verifier_service import VerifierService
+        from belling_cat.domain.value_objects import Evidence, SubClaim
+        from belling_cat.infrastructure.langgraph.workflow import create_workflow
+
+        @dataclass
+        class MockEvidence:
+            source_url: str
+            publication_date: str
+            credibility: str
+            quote: str
+
+        @dataclass
+        class MockVerdict:
+            category: str
+            explanation: str
+            confidence: str
+
+        # Mock adapter
+        class MockAdapter:
+            def decompose_claim(self, claim: str) -> list[str]:
+                return ["sub-claim 1"]
+
+            def investigate_subclaim(self, subclaim: str) -> tuple[list[MockEvidence], list[str]]:
+                evidence = [
+                    MockEvidence(
+                        source_url="https://example.com",
+                        publication_date="2024-01-01",
+                        credibility="government",
+                        quote="Test evidence",
+                    )
+                ]
+                findings = ["Searching...", "Found 1 source"]
+                return (evidence, findings)
+
+            def verify_claim(
+                self, subclaim: SubClaim, evidence: list[Evidence]
+            ) -> tuple[MockVerdict, list[str]]:
+                verdict = MockVerdict(
+                    category="Supported",
+                    explanation="Evidence supports this claim",
+                    confidence="high",
+                )
+                return (verdict, [])
+
+        decomp_service = DecompositionService(llm_adapter=MockAdapter())
+        inv_service = InvestigationService(llm_adapter=MockAdapter())
+        ver_service = VerifierService(llm_adapter=MockAdapter())
+        workflow = create_workflow(
+            decomposition_service=decomp_service,
+            investigation_service=inv_service,
+            verifier_service=ver_service,
+        )
+
+        result = workflow.invoke({"claim": "test claim"})
+
+        # Verify verification ran and returned verdicts
+        assert "verdicts" in result
+        assert len(result["verdicts"]) >= 1
+        assert result["verdicts"][0].category == "Supported"
+        assert result["verdicts"][0].explanation == "Evidence supports this claim"
+
 
 class TestLangGraphWorkflowIntegration:
     """End-to-end integration tests with real OpenAI API."""

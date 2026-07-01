@@ -1,10 +1,14 @@
 """OpenAI LLM adapter implementation."""
 
 import json
+from typing import TYPE_CHECKING
 
 from openai import OpenAI
 
-from belling_cat.application.ports.llm import RawEvidence
+from belling_cat.application.ports.llm import RawEvidence, RawVerdict
+
+if TYPE_CHECKING:
+    from belling_cat.domain.value_objects import Evidence, SubClaim
 
 
 class OpenAIAdapter:
@@ -118,3 +122,91 @@ class OpenAIAdapter:
 
         # Fallback: return empty evidence if parsing fails
         return ([], ["No evidence found"])
+
+    def verify_claim(
+        self, subclaim: "SubClaim", evidence: list["Evidence"]
+    ) -> tuple[RawVerdict, list[str]]:
+        """Verify a sub-claim using gathered evidence and assess credibility.
+
+        Args:
+            subclaim: The sub-claim to verify
+            evidence: Evidence gathered for the sub-claim
+
+        Returns:
+            Tuple of (verdict, contradictions) where verdict is a RawVerdict
+            and contradictions is a list of contradiction explanations
+        """
+        # Prepare evidence summary for the prompt
+        evidence_summary = []
+        for i, ev in enumerate(evidence, 1):
+            evidence_summary.append(
+                f"Source {i}: {ev.source.url} ({ev.source.authority_level}, "
+                f"{ev.source.publication_date})\nQuote: {ev.quote}"
+            )
+        evidence_text = "\n\n".join(evidence_summary)
+
+        system_prompt = (
+            "You are a fact-checking verifier. Assess the credibility of evidence "
+            "and generate a verdict for the given sub-claim. Use the authority hierarchy: "
+            "government > academic > established news > other. "
+            "Detect contradictions between sources and explain them. "
+            "Return ONLY a JSON object with:\n"
+            '{\n  "verdict": {\n'
+            '    "category": "Supported" or "Contradicted" or "Unsupported",\n'
+            '    "explanation": "explanation of the verdict",\n'
+            '    "confidence": "high" or "medium" or "low"\n  },\n'
+            '  "contradictions": ["contradiction explanation 1", ...]\n}\n'
+            "Categories:\n"
+            "- Supported: Multiple authoritative sources agree with the claim\n"
+            "- Contradicted: Authoritative sources directly refute the claim\n"
+            "- Unsupported: Insufficient authoritative evidence (not proven false)"
+        )
+
+        user_prompt = (
+            f"Sub-claim: {subclaim.text}\n\nEvidence:\n{evidence_text}\n\n"
+            "Assess the credibility and generate a verdict."
+        )
+
+        response = self._client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0.0,  # Deterministic for testing
+        )
+
+        content = response.choices[0].message.content
+        if content is None:
+            return (
+                RawVerdict(
+                    category="Unsupported",
+                    explanation="Unable to verify claim",
+                    confidence="low",
+                ),
+                [],
+            )
+
+        try:
+            data = json.loads(content)
+            if isinstance(data, dict) and "verdict" in data and "contradictions" in data:
+                verdict_data = data["verdict"]
+                verdict = RawVerdict(
+                    category=verdict_data["category"],
+                    explanation=verdict_data["explanation"],
+                    confidence=verdict_data["confidence"],
+                )
+                contradictions = data["contradictions"]
+                return (verdict, contradictions)
+        except (json.JSONDecodeError, KeyError, TypeError):
+            pass
+
+        # Fallback: return Unsupported verdict if parsing fails
+        return (
+            RawVerdict(
+                category="Unsupported",
+                explanation="Unable to verify claim",
+                confidence="low",
+            ),
+            [],
+        )

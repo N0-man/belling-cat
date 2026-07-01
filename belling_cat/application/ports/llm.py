@@ -1,7 +1,10 @@
 """LLM adapter port interface."""
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
+
+if TYPE_CHECKING:
+    from belling_cat.domain.value_objects import Evidence, SubClaim
 
 
 @dataclass
@@ -12,6 +15,15 @@ class RawEvidence:
     publication_date: str
     credibility: str
     quote: str
+
+
+@dataclass
+class RawVerdict:
+    """Raw verdict structure returned by LLM adapters."""
+
+    category: str  # "Supported", "Contradicted", or "Unsupported"
+    explanation: str
+    confidence: str  # "high", "medium", "low"
 
 
 class LLMPort(Protocol):
@@ -40,5 +52,20 @@ class LLMPort(Protocol):
         Returns:
             Tuple of (evidence_list, findings_list) where evidence contains
             RawEvidence objects and findings contains progress messages
+        """
+        ...
+
+    def verify_claim(
+        self, subclaim: "SubClaim", evidence: list["Evidence"]
+    ) -> tuple[RawVerdict, list[str]]:
+        """Verify a sub-claim using gathered evidence and assess credibility.
+
+        Args:
+            subclaim: The sub-claim to verify
+            evidence: Evidence gathered for the sub-claim
+
+        Returns:
+            Tuple of (verdict, contradictions) where verdict is a RawVerdict
+            and contradictions is a list of contradiction explanations
         """
         ...
