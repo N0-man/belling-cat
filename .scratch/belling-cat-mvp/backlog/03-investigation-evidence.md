@@ -2,7 +2,7 @@
 
 ## Status
 
-to-do
+doing
 
 ## Parent
 
@@ -16,15 +16,15 @@ The user should see live progress updates like "Searching for elephant sightings
 
 ## Acceptance criteria
 
-- [ ] LangGraph workflow node created for Investigation Agent
-- [ ] Agent uses GPT-4 Turbo (or equivalent mid-tier model) with web search capability
-- [ ] Given sub-claims, agent searches for evidence from authoritative sources
-- [ ] Real-time findings streamed to terminal using Rich's Live Display
-- [ ] Evidence captured includes: source URL, publication date, credibility hint, specific quote/fact
-- [ ] Multiple sub-claims can be investigated in parallel where dependencies allow
-- [ ] Source authority levels identified (government, academic, news, social media, etc.)
-- [ ] Integration test with mocked streaming responses verifies terminal output
-- [ ] End-to-end test with real OpenAI API verifies evidence gathering
+- [x] LangGraph workflow node created for Investigation Agent
+- [x] Agent uses GPT-4 Turbo (or equivalent mid-tier model) with web search capability
+- [x] Given sub-claims, agent searches for evidence from authoritative sources
+- [x] Real-time findings streamed to terminal using Rich's Live Display
+- [x] Evidence captured includes: source URL, publication date, credibility hint, specific quote/fact
+- [x] Multiple sub-claims can be investigated in parallel where dependencies allow
+- [x] Source authority levels identified (government, academic, news, social media, etc.)
+- [x] Integration test with mocked streaming responses verifies terminal output
+- [x] End-to-end test with real OpenAI API verifies evidence gathering
 
 ## Blocked by
 

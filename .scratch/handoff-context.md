@@ -2,29 +2,30 @@
 
 ## Metadata
 
-- Generated at (UTC): 2026-06-28 12:45:32 UTC
-- Current HEAD: 6355406c41df3de592bbb8d1d3ad69fe68bfbb0b
-- Previous handoff HEAD: 9c9c0af1907cd211263b8da42116943203ffe22d
-- Stale context detected: yes (previous handoff belonged to an older commit; Item 01 has since been completed and committed)
+- Generated at (UTC): 2026-07-01 22:33:31 UTC
+- Current HEAD: 3b3d6199e136e73ca0385035d5c4ba88ed9e25bf
+- Previous handoff HEAD: 6355406c41df3de592bbb8d1d3ad69fe68bfbb0b
+- Stale context detected: yes (previous handoff belonged to Item 02; Item 02 has since been completed and committed)
 
 ## Next-session focus
 
-Implementing **Item 02: Claim Decomposition Agent** using TDD. This is the first LangGraph agent in the investigation pipeline, responsible for breaking user claims into discrete, independently verifiable sub-claims using OpenAI's GPT-4o mini model.
+Implementing **Item 03: Investigation & Evidence Gathering** using TDD. This is the second agent in the investigation pipeline, responsible for searching for evidence using GPT-4 Turbo with web search enabled, streaming real-time findings to the terminal.
 
 ## Current status
 
 - Item 00 (Scaffolding & Tech Stack Setup): `done`
 - Item 01 (CLI Foundation & Command Parsing): `done`
-- Item 02 (Claim Decomposition Agent): `to-do` and ready to implement (blocker Item 01 is done)
-- Starting TDD implementation: LangGraph workflow node, GPT-4o mini integration, JSON sub-claims output
+- Item 02 (Claim Decomposition Agent): `done`
+- Item 03 (Investigation & Evidence Gathering): `to-do` and ready to implement (blocker Item 02 is done)
+- Starting TDD implementation: Investigation Agent with web search, Rich Live Display streaming, parallel sub-claim processing
 
 ## Open decisions and blockers
 
-None - Item 02 has clear acceptance criteria and no blockers.
+None - Item 03 has clear acceptance criteria and no blockers.
 
 ## Suggested next actions
 
-1. Load `/tdd` skill and implement Item 02 test-first
+1. Load `/tdd` skill and implement Item 03 test-first
 2. After each GREEN cycle, append one-line TDD log entry to this file under `## TDD Log` section
 3. Run typechecking regularly during development
 4. Self-review with `/review` using `main` as fixed point
@@ -41,7 +42,7 @@ None - Item 02 has clear acceptance criteria and no blockers.
 
 ## References
 
-- Backlog item: `.scratch/belling-cat-mvp/backlog/02-claim-decomposition.md`
+- Backlog item: `.scratch/belling-cat-mvp/backlog/03-investigation-evidence.md`
 - Backlog tracker: `.scratch/belling-cat-mvp/backlog.md`
 - PRD: `.scratch/belling-cat-mvp/PRD.md`
 - Domain model: `CONTEXT.md`
@@ -51,9 +52,10 @@ None - Item 02 has clear acceptance criteria and no blockers.
 ## TDD Log
 
 _(Entries appended after each GREEN cycle)_
-- [2026-06-28 12:49:06] GREEN: test_simple_claim_returns_single_subclaim - Simple claim decomposition returns single SubClaim
-- [2026-06-28 12:50:10] GREEN: test_complex_claim_returns_multiple_subclaims - Complex claim decomposition returns multiple SubClaims
-- [2026-06-28 12:51:13] GREEN: OpenAI adapter tests - Adapter calls GPT-4o mini with decomposition prompt
-- [2026-06-28 12:52:49] GREEN: LangGraph workflow tests - Workflow orchestrates claim decomposition with decompose node
-- [2026-06-28 12:54:20] GREEN: Integration test added - Real OpenAI API end-to-end test (marked slow/integration, skips without API key)
-- [2026-06-28 13:00:29] REFACTOR: Fixed architecture violation - Workflow now uses DecompositionService instead of calling LLM adapter directly
+- [2026-07-01 22:35:58] GREEN: test_simple_subclaim_returns_evidence_with_source - Investigation service returns evidence with source URL, publication date, and quote
+- [2026-07-01 22:37:15] GREEN: test_multiple_sources_with_different_authority_levels - Investigation handles multiple evidence sources with different authority levels (government, academic, news)
+- [2026-07-01 22:37:39] GREEN: test_investigation_returns_findings_during_search - Investigation service returns findings (progress messages) along with evidence
+- [2026-07-01 22:40:27] GREEN: test_adapter_investigates_subclaim_with_gpt4 - OpenAI adapter implements investigate_subclaim using GPT-4 Turbo, returning RawEvidence and findings
+- [2026-07-01 22:42:38] GREEN: test_workflow_includes_investigation_node - LangGraph workflow includes investigation node that orchestrates evidence gathering for sub-claims
+- [2026-07-01 22:47:53] REFACTOR: Fixed architecture violations - Added timestamp to Evidence, moved RawEvidence to port layer for type safety
+

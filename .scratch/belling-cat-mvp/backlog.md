@@ -10,8 +10,8 @@ This backlog tracks the implementation of the Belling Cat fact-checking terminal
 |---------|-------|--------|-----------|-----|-----------|
 | Item 00 | Scaffolding & Tech Stack Setup | done | None - can start immediately | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/00-scaffolding-tech-stack.md |
 | Item 01 | CLI Foundation & Command Parsing | done | Item 00 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/01-cli-foundation.md |
-| Item 02 | Claim Decomposition Agent | to-do | Item 01 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/02-claim-decomposition.md |
-| Item 03 | Investigation & Evidence Gathering | to-do | Item 02 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/03-investigation-evidence.md |
+| Item 02 | Claim Decomposition Agent | done | Item 01 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/02-claim-decomposition.md |
+| Item 03 | Investigation & Evidence Gathering | doing | Item 02 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/03-investigation-evidence.md |
 | Item 04 | Verifier Agent & Verdict Display with User Approval | to-do | Item 03 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/04-verifier-verdict.md |
 | Item 05 | Report Generation via /save Command | to-do | Item 04 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/05-report-generation.md |
 | Item 06 | Session Loop & Error Handling | to-do | Item 05 | .scratch/belling-cat-mvp/PRD.md | .scratch/belling-cat-mvp/backlog/06-session-loop.md |
