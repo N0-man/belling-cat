@@ -1,12 +1,12 @@
 ---
-description: Synthesize conversation into a PRD saved under .scratch/<feature-name>/PRD.md
+description: Create a PRD from the confirmed discovery interaction and durable decision records
 agent: plan
 ---
 
-Run the `/check-handoff` skill first.
+Run the `check-handoff` skill for the `create-prd` command, then use the `create-prd` skill to create or update `.scratch/<increment>/PRD.md`.
 
-Use the `/create-prd` skill to synthesize the current conversation and codebase into a PRD.
+Use the current discovery conversation and repository artifacts. If the interaction does not yet contain sufficient confirmed requirements, route back to `/discover` rather than fabricating scope. Ensure accepted technical choices are recorded as design decisions or ADRs and referenced by the PRD.
 
-Do not run a broad interview. Synthesize from known context and ask at most one focused clarification only if testing seams are ambiguous.
+Arguments: optional increment name.
 
 $ARGUMENTS

@@ -1,29 +1,34 @@
 ---
 name: preflight
-description: Run full CI-equivalent preflight checks (lint, format, tests, coverage)
-disable-model-invocation: true
+description: Run the repository's non-mutating CI-equivalent verification checks, including workflow consistency when configured, and fail on workspace mutation.
+compatibility: opencode
+metadata:
+  workflow: verification
 ---
 
-# /preflight
+# Preflight
 
-Run the full CI-equivalent preflight check suite and report results.
+## Discover the gate
 
-## Steps
+Prefer `make preflight` or the repository's documented CI-equivalent target. The Makefile or CI configuration owns executable verification commands; do not maintain contradictory copies in agent instructions.
 
-1. Run `make preflight` with output redirected:
-   ```bash
-   make preflight > /tmp/preflight-output.txt 2>&1; echo "EXIT CODE: $?" >> /tmp/preflight-output.txt
-   ```
+Otherwise reproduce non-mutating checks from workflow/config files: lint check, format check, type/static analysis, tests, coverage only when configured, architecture/import checks when present, and `workflow-lint` when this OpenCode workflow is stored in the repository.
 
-2. Check the exit code at the end of the output file.
+Do not claim a check exists merely because a generic workflow mentions it.
 
-3. If exit code is 0: Report success with a summary of what passed.
+## Non-mutation guarantee
 
-4. If exit code is non-zero: Read the output file, identify which check(s) failed, and provide actionable fix suggestions:
-   - Lint failures → `make lint-fix`
-   - Format failures → `uv run ruff format`
-   - Test failures → show failing tests, suggest running them individually
-   - Coverage failures → identify uncovered lines, suggest adding tests
-   - Frontend failures → `cd frontend && npx next lint --fix` or `npx tsc --noEmit`
+Capture `git status --short` before and after. Preflight commands must use check modes, never auto-fix or rewrite. If verification changes files, preflight fails and reports the mutation.
 
-5. Show a concise pass/fail summary.
+Baseline-preserved unrelated changes may remain, but the before/after delta from preflight itself must be empty.
+
+## Result
+
+Report each executed check, command, exit status, and concise failure evidence. Overall success requires:
+
+- every required check passed;
+- no unexpected warnings treated as errors by project policy;
+- workflow consistency passed when configured;
+- workspace delta after preflight is empty relative to its starting state.
+
+Suggest `/lint --fix <paths>` for fixable style/format failures, but do not run it automatically during preflight.

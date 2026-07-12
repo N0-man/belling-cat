@@ -1,38 +1,35 @@
 ---
 name: test-affected
-description: Find and run tests affected by recent changes
-disable-model-invocation: true
+description: Select and run tests affected by explicit paths or changes since a fixed commit, with safe fallback when repository-specific mapping is unavailable.
+compatibility: opencode
+metadata:
+  workflow: verification
 ---
 
-# /test-affected
+# Test Affected
 
-Find tests affected by current changes and run them.
+## Determine changed paths
 
-## Arguments
+Priority:
+1. explicit paths;
+2. `--since <commit>`;
+3. active handoff `story_base_sha`;
+4. uncommitted paths from `git diff --name-only` and `git diff --cached --name-only`.
 
-- Optional: specific file path(s) to find affected tests for
-- If no argument given, uses `git diff --name-only HEAD` to detect changed files
+For committed story cycles, do not default to `git diff --name-only HEAD`, which is empty by design.
 
-## Steps
+## Select tests
 
-1. Find affected tests:
-   ```bash
-   # If file argument provided:
-   python scripts/affected_tests.py <file_args>
-   # Otherwise, from git diff:
-   git diff --name-only HEAD | python scripts/affected_tests.py
-   ```
+Use the repository's existing affected-test script or build target when present. Do not assume `scripts/affected_tests.py` or a parser exists.
 
-2. If no affected tests found, report that and exit.
+Otherwise map conservatively using repository conventions:
+- directly changed tests;
+- tests mirroring changed modules;
+- package/module test directories;
+- integration/contract tests for changed public interfaces.
 
-3. Run the affected tests with output redirect:
-   ```bash
-   uv run pytest <affected_test_files> --tb=short -q > /tmp/pytest-output.txt 2>&1; echo "EXIT CODE: $?" >> /tmp/pytest-output.txt
-   ```
+If impact cannot be mapped reliably, run the relevant package suite or full suite. “No mapped tests” is not evidence that no tests are affected.
 
-4. Parse results:
-   ```bash
-   python scripts/parse_test_results.py
-   ```
+## Run and report
 
-5. Report pass/fail counts. If failures, show the failing test names and suggest running them individually for debugging.
+Use the configured test runner. Report commands, pass/fail counts, failing test names, and selection rationale. Return failure when any selected check fails.

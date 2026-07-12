@@ -1,19 +1,10 @@
 ---
-description: Three-axis review (Standards + Spec + Architecture) since a fixed point
+description: Review an exact committed range for standards, intent/specification, and proportionate architecture
 agent: build
-subtask: true
 ---
 
-Use the `/review` skill to review changes since a fixed point (commit, branch, or tag).
+Use the `review` skill and then the `finding-triage` skill. Invoke the `standards-reviewer` subagent, the `spec-reviewer` subagent, and the `architecture-reviewer` subagent in parallel.
 
-Three parallel sub-agents report separately:
-
-- **Standards** — does the code follow documented coding standards?
-- **Spec** — does the code match the originating issue/PRD?
-- **Architecture** — does the code respect the domain model, DDD layer boundaries, and ADRs?
-
-A change can pass one axis and fail the others — they are deliberately separate.
-
-Arguments: <fixed-point> (e.g., main, HEAD~5, commit SHA)
+Arguments may include an exact fixed point and explicit story/specification path. During implementation, use the active handoff's story base SHA, intent packet, story file, PRD, and referenced design/ADR records. Review is read-only; do not repair findings in this command.
 
 $ARGUMENTS

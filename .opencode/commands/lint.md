@@ -1,8 +1,10 @@
 ---
-description: Auto-fix lint and formatting issues for Python and frontend
+description: Check repository lint and formatting; pass --fix to apply scoped fixes
 agent: build
-subtask: true
 ---
 
-Use the `/lint` skill to auto-fix linting and formatting across Python and frontend, then confirm the workspace is clean.
+Use the `lint` skill. Without `--fix`, run non-mutating lint and format checks. With `--fix`, establish scope protection and apply fixes only to explicit paths or the active story scope; do not sweep unrelated files.
 
+Arguments: optional paths and `--fix`.
+
+$ARGUMENTS

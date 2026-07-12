@@ -1,124 +1,80 @@
 ---
 name: tdd
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
+description: Execute one behavioural Red-Green-Refactor cycle at a time, checkpoint every phase, preserve scope, and leave each cycle in a committed green state.
+compatibility: opencode
+metadata:
+  workflow: implementation
 ---
 
 # Test-Driven Development
 
-## Philosophy
+## Core rule
 
-**Core principle**: Tests should verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't.
+Do not change production behaviour before observing a test fail for the intended missing or incorrect behaviour.
 
-**Good tests** are integration-style: they exercise real code paths through public APIs. They describe _what_ the system does, not _how_ it does it. A good test reads like a specification - "user can checkout with valid cart" tells you exactly what capability exists. These tests survive refactors because they don't care about internal structure.
+One cycle covers one named behaviour and ends with a green commit:
 
-**Bad tests** are coupled to implementation. They mock internal collaborators, test private methods, or verify through external means (like querying a database directly instead of using the interface). The warning sign: your test breaks when you refactor, but behavior hasn't changed. If you rename an internal function and tests fail, those tests were testing implementation, not behavior.
-
-## Anti-Pattern: Horizontal Slices
-
-**DO NOT write all tests first, then all implementation.** This is "horizontal slicing" - treating RED as "write all tests" and GREEN as "write all code."
-
-This produces **crap tests**:
-
-- Tests written in bulk test _imagined_ behavior, not _actual_ behavior
-- You end up testing the _shape_ of things (data structures, function signatures) rather than user-facing behavior
-- Tests become insensitive to real changes - they pass when behavior breaks, fail when behavior is fine
-- You outrun your headlights, committing to test structure before understanding the implementation
-
-**Correct approach**: Vertical slices via tracer bullets. One test → one implementation → repeat. Each test responds to what you learned from the previous cycle. Because you just wrote the code, you know exactly what behavior matters and how to verify it.
-
-```
-WRONG (horizontal):
-  RED:   test1, test2, test3, test4, test5
-  GREEN: impl1, impl2, impl3, impl4, impl5
-
-RIGHT (vertical):
-  RED→GREEN: test1→impl1
-  RED→GREEN: test2→impl2
-  RED→GREEN: test3→impl3
-  ...
+```text
+RED -> GREEN -> REFACTOR -> VERIFY -> COMMIT
 ```
 
-## Workflow
+Do not commit RED separately.
 
-### 1. Planning
+For a pure structural refactor, use existing behavioural protection or add characterization coverage. When the new test passes immediately, demonstrate that it can detect the relevant breakage through a controlled mutation or another credible safety signal rather than manufacturing a fake failure.
 
-When exploring the codebase, read `CONTEXT.md` (if it exists) so that test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
+## Before a cycle
 
-Before writing any code:
+Read the active story/refactor, PRD or audit report, product backlog, handoff, intent packet, scope baseline, relevant context, design records, ADRs, tests, and code. Confirm:
 
-- [ ] Identify the behaviors to test (not implementation steps)
-- [ ] Identify opportunities for deep modules (small interface, deep implementation) by reviewing existing module boundaries and keeping interfaces minimal
+- the next acceptance criterion, finding, or protected behaviour;
+- the value/demo outcome it contributes to;
+- the public seam to test;
+- current cycle number and workspace state;
+- that unrelated baseline changes will not be touched.
 
-**If a backlog item was provided** (i.e., you were invoked from `/implement`): derive the interface and behaviors directly from the backlog item's acceptance criteria. Do not ask the user for confirmation unless it's ambiguous or incomplete — proceed to the Tracer Bullet step.
+## RED
 
-**If no backlog item was provided** (i.e., direct `/tdd` invocation): ask the user to confirm the interface and prioritize behaviors before proceeding:
-- Confirm what interface changes are needed
-- Confirm which behaviors to test (prioritize)
-- Get user approval on the plan
+Write the smallest behavioural test. Run the narrowest command and confirm it fails for the expected reason—not syntax, import, fixture, environment, or collection failure. Checkpoint the test, command, and failure evidence.
 
-Ask: "What should the public interface look like? Which behaviors are most important to test?"
+A test that passes immediately does not establish RED. Determine whether behaviour already exists, the assertion is weak, or the wrong seam was chosen.
 
-**testing scope** Focus testing effort on all critical paths, behaviors and various edge cases.
+## GREEN
 
-### 2. Tracer Bullet
+Implement only enough code to pass the focused test. Do not anticipate later behaviours. Run the focused test and checkpoint GREEN evidence.
 
-Write ONE test that confirms ONE thing about the system:
+Fix forward within approved intent. Do not delete or revert deliberate functionality merely to make a finding disappear.
 
+## REFACTOR
+
+While green:
+
+- remove duplication and improve names/cohesion;
+- keep important business rules separate from delivery and external I/O where practical;
+- avoid abstractions, ports, layers, or DDD patterns without a concrete need;
+- prefer the smallest root-cause improvement over a line-level patch when the same defect class would otherwise remain;
+- preserve accepted structure and decision records;
+- check whether implementation revealed a new technical decision or useful domain-language change.
+
+Invoke the `decision-recording` skill when a choice deserves durable rationale. Invoke the `domain-modeling` skill only when language or ownership genuinely changed. A newly discovered product behaviour or scope decision returns to `/discover`.
+
+Run focused tests after meaningful refactoring and checkpoint the result.
+
+## VERIFY
+
+Run focused tests, `test-affected`, and proportionate type/lint/architecture checks. Record commands and results. Full preflight is required at story end, not necessarily every cycle.
+
+Invoke the `scope-guard` skill before commit and confirm the diff contains only the current behaviour or approved repair.
+
+## COMMIT
+
+Use the `commit` skill to create one commit for the complete green cycle, for example:
+
+```text
+ITEM-03 Cycle 02: reject an empty claim
 ```
-RED:      Write test for first behavior → test fails
-GREEN:    Write minimal code to pass → test passes
-REFACTOR: Clean up and check layer placement → tests still pass
-```
 
-This is your tracer bullet — proves the path works end-to-end.
+Checkpoint the commit SHA and update `current_head`. Confirm unrelated baseline changes remain outside the commit. Only then begin the next cycle.
 
-### 3. Incremental Loop
+## Completion evidence
 
-Each cycle is a complete **RED → GREEN → REFACTOR**. Never skip REFACTOR to get to the next test — that is how drift and layer violations accumulate.
-
-```
-RED:      Write next failing test
-GREEN:    Minimal code to pass
-REFACTOR: Clean before moving on
-```
-
-**REFACTOR checklist (run after every GREEN):**
-
-_Layer placement — check first:_
-
-Read `CONTEXT.md` and `docs/00-repo-structure.md` for the layer boundaries, then apply the Clean Architecture dependency rule: **dependencies point inward only**.
-
-| Layer | Contains | Must not depend on |
-|---|---|---|
-| **Domain** | Entities, value objects, domain services, aggregates | Everything outside itself |
-| **Application** | Use cases, application services, port interfaces | Infrastructure, delivery |
-| **Adapters** | Concrete implementations of ports (LLM, DB, search, etc.) | Delivery layer |
-| **Delivery** | Entry points — wiring and I/O formatting only | Nothing domain-internal |
-
-- Is this code in the right layer?
-- Does any inner layer import an outer layer? (violation — extract a port)
-- Is domain logic free of I/O, framework imports, and LLM calls?
-- Are external concerns behind a port?
-- Is the delivery layer doing nothing but wiring?
-
-_Then standard refactors:_
-
-- [ ] Extract duplication
-- [ ] Deepen modules — small interface, deep implementation
-- [ ] Apply SOLID principles where natural
-- [ ] Run tests after each refactor step
-
-**Never refactor while RED.** Get to GREEN first, then clean.
-
-## Checklist Per Cycle
-
-```
-[ ] RED:      Test fails for the right reason
-[ ] GREEN:    Minimal code only — no speculative additions
-[ ] REFACTOR: Layer placement verified
-[ ] REFACTOR: No duplication introduced
-[ ] REFACTOR: Tests still pass after refactor
-[ ] Test describes behavior, not implementation
-[ ] Test uses public interface only
-[ ] Test would survive internal refactor
-```
+Never claim TDD was followed unless each changed behaviour has RED or credible safety evidence, GREEN evidence, refactor consideration, verification evidence, a scoped green commit, and a handoff checkpoint.

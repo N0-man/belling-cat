@@ -1,22 +1,40 @@
-.PHONY: install test lint typecheck preflight clean
+.PHONY: install lock test lint lint-fix format format-check typecheck workflow-lint preflight clean
+
+PATHS ?= .
+MYPY_PATHS ?= .
+PYTEST_ARGS ?=
 
 install:
-	uv sync
+	uv sync --locked
 
+lock:
+	uv lock
+
+# Non-mutating checks used by preflight/CI.
 test:
-	uv run pytest
+	uv run --locked pytest $(PYTEST_ARGS)
 
 lint:
-	uv run ruff check . --fix
-	uv run ruff format .
+	uv run --locked ruff check $(PATHS)
+
+format-check:
+	uv run --locked ruff format --check $(PATHS)
 
 typecheck:
-	uv run mypy belling_cat
+	uv run --locked mypy $(MYPY_PATHS)
 
-preflight: lint typecheck test
-	@echo "✓ Preflight checks passed"
+workflow-lint:
+	python scripts/validate_agent_workflow.py
+
+# Explicitly mutating developer commands. Limit PATHS during focused work.
+lint-fix:
+	uv run --locked ruff check $(PATHS) --fix
+
+format:
+	uv run --locked ruff format $(PATHS)
+
+preflight: workflow-lint lint format-check typecheck test
 
 clean:
-	rm -rf .pytest_cache .mypy_cache .ruff_cache
-	find . -type d -name __pycache__ -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete
+	rm -rf .pytest_cache .mypy_cache .ruff_cache htmlcov .coverage
+	find . -path './.venv' -prune -o -path './.git' -prune -o -type d -name __pycache__ -exec rm -rf {} +

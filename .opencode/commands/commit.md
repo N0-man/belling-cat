@@ -1,11 +1,10 @@
 ---
-description: Commit the current reviewed changes
+description: Commit one scoped verified Red-Green-Refactor or documentation repair cycle
 agent: build
-subtask: true
 ---
 
-Use the `/commit` skill to create one commit from the current reviewed changes.
+Use the `scope-guard` skill and the `commit` skill. Stage only explicit files belonging to the active cycle, preserve unrelated baseline changes, and never bypass hooks.
 
-Arguments: optional commit message
+Arguments: optional commit message.
 
 $ARGUMENTS

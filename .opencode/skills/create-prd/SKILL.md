@@ -1,76 +1,32 @@
 ---
 name: create-prd
-description: Turn the current conversation into a single-feature PRD saved locally under .scratch/<feature-name>/PRD.md — this is just synthesis of what you've already discussed.
-disable-model-invocation: true
+description: Synthesize the confirmed discovery interaction and durable decision records into a concise, traceable product requirements document that preserves user intent.
+compatibility: opencode
+metadata:
+  workflow: planning
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a PRD. Each PRD and conversation is for a single feature only. Do not run a broad interview. Synthesize from existing context; ask at most one targeted clarification only if testing seams are ambiguous.
+# Create PRD
+
+## Gate
+
+Use the confirmed discovery interaction as the primary source. Also read relevant code, tests, `CONTEXT.md`, repository structure, increment design records, and ADRs.
+
+If the available conversation does not establish the outcome, scope, important behaviours, deliberate constraints, and acceptance evidence, stop and recommend `/discover`. Do not infer product intent from code or fabricate a discovery artifact merely to satisfy a gate.
 
 ## Process
 
-1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain glossary vocabulary throughout the PRD, and respect any ADRs in the area you're touching.
+1. Resolve the increment name and `.scratch/<increment>/PRD.md` path.
+2. Capture the user's objective in outcome terms, not as a list of files or implementation tasks.
+3. Extract product behaviour, constraints, failure behaviour, quality attributes, exclusions, deliberate trade-offs, ruled-out approaches, and deferred scope from the confirmed interaction.
+4. Inspect implementation decisions embedded in source notes or an existing PRD.
+5. Invoke the `decision-recording` skill to move accepted technical choices to `docs/design/<increment>.md`, ADRs, or repository structure as appropriate.
+6. Keep unresolved alternatives as explicit open decisions; do not choose silently.
+7. Assign stable requirement IDs such as `REQ-001` and quality IDs such as `NFR-001`.
+8. Prefer observable requirements and concise examples over implementation recipes.
+9. Record the highest useful public test/demo seams.
+10. Ensure each durable fact has one primary owner; use references rather than duplicating full rationale across PRD, design, ADR, README, and context.
+11. Write the PRD using `PRD-FORMAT.md`.
+12. Present a concise summary and ask one approval question before treating it as ready for backlog creation.
 
-2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one.
-
-If seam choice is ambiguous, ask one focused confirmation question to align expectations. If seams are already clear from context, do not ask follow-up questions.
-
-3. The PRD will be saved under .scratch/<feature-name>/PRD.md. Define the feature name based on the current conversation context.
-
-4. Write the PRD using the template below and save it to `.scratch/<feature-name>/PRD.md`.
-
-5. If a per-feature tracker exists at `.scratch/<feature-name>/backlog.md`, do not rewrite historical backlog item statuses. Only add a short note (optional) linking this PRD to that tracker.
-
-<prd-template>
-
-## Problem Statement
-
-The problem that the user is facing, from the user's perspective.
-
-## Solution
-
-The solution to the problem, from the user's perspective.
-
-## Scope
-
-A LONG, numbered list of GIVEN, WHEN, THEN statements based on the conversation
-
-1. GIVEN user enters query, WHEN the user hits enter, THEN the solution should
-   (a) Extract filter cues from the query such as time and location using LLM
-   (b) Decompose query into smaller CLIP style caption queries using LLM
-   (c) Both a and b should be structured into JSON
-
-This list of scope statements should be extremely extensive and cover all aspects of the feature (positive and negative scenarios).
-
-## Implementation Decisions
-
-A list of implementation decisions that were made. This can include:
-
-- The modules that will be built/modified
-- The interfaces of those modules that will be modified
-- Technical clarifications from the developer
-- Architectural decisions
-- Schema changes
-- API contracts
-- Specific interactions
-
-Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
-
-Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it within the relevant decision and note briefly that it came from a prototype. Trim to the decision-rich parts — not a working demo, just the important bits.
-
-## Testing Decisions
-
-A list of testing decisions that were made. Include:
-
-- A description of what makes a good test (only test external behavior, not implementation details)
-- Which modules will be tested
-- Prior art for the tests (i.e. similar types of tests in the codebase)
-
-## Out of Scope
-
-A description of the things that are out of scope for this PRD.
-
-## Further Notes
-
-Any further notes about the feature.
-
-</prd-template>
+Do not create backlog stories in this skill.

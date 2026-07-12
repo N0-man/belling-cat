@@ -1,74 +1,69 @@
 ---
 name: handoff
-description: Write or refresh a workspace handoff document at .scratch/handoff-context.md for the next session.
-argument-hint: "What will the next session be used for?"
-disable-model-invocation: true
+description: Maintain durable active-story recovery state, reconcile it with the product backlog tracker, and preserve scope, intent, per-cycle evidence, findings, validation, and commits.
+compatibility: opencode
+metadata:
+  workflow: state-management
 ---
 
-Write a handoff document summarizing the current conversation so a fresh agent can continue the work.
+# Handoff
 
-Save to `.scratch/handoff-context.md` in the workspace.
+The active file is `.scratch/handoff-context.md`. It complements, but does not replace, the product backlog tracker.
 
-Always overwrite the file on each `/handoff` run.
+## Bootstrap
 
-Map each handoff to the current commit:
+At story start:
 
-- Resolve current `HEAD` commit hash.
-- Record it in the handoff file under a metadata section.
-- Record UTC timestamp for when the handoff was generated.
+- require the tracker row to be `doing`;
+- create the handoff using `HANDOFF-FORMAT.md` if none exists;
+- if a handoff describes the same story, resume without overwriting history;
+- if it describes different work, surface the conflict;
+- record tracker, story, PRD, `story_base_sha`, current HEAD, scope baseline, and intent packet before production changes.
 
-Detect stale handoff context before overwrite:
+The scope baseline lists pre-existing staged, modified, and untracked files. The intent packet records the user's objective, accepted constraints/trade-offs, exclusions, and demonstration outcome.
 
-- If `.scratch/handoff-context.md` already exists, read its previously recorded commit hash.
-- Compare previous hash with current `HEAD` hash.
-- If they differ, include a `Stale context detected` note in the new file explaining that the previous handoff belonged to an older commit.
-- If they match, state `No stale context detected`.
+## Checkpoint
 
-Include a "suggested skills" section in the document, which suggests skills that the agent should invoke.
+After every material phase, update metadata and append evidence:
 
-Do not duplicate content already captured in other artifacts (PRDs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead.
+- scope changes and their relationship to intent;
+- RED observed with expected failure;
+- GREEN focused test passed;
+- REFACTOR completed and context/decision records checked;
+- VERIFY affected or broader tests passed;
+- COMMIT created with SHA;
+- REVIEW/TRACEABILITY findings and triage action;
+- repair or user-decision status;
+- PREFLIGHT result;
+- VALIDATION outcome and risk assessment.
 
-Redact any sensitive information, such as API keys, passwords, or personally identifiable information.
+Use cycle/phase identity to avoid duplicate log entries after retries. Never claim a phase without evidence. Never delete old finding or repair history; mark its status and resolution.
 
-If the user passed arguments, treat them as a description of what the next session will focus on and tailor the doc accordingly.
+## Reconcile
 
-Use this structure:
+Use when tracker, handoff, Git, or scope baseline disagree.
 
-```md
-# Handoff Context
+1. Read the tracker, story, Git status/log/diff, tests, and handoff history.
+2. Determine what can be established from evidence.
+3. Preserve uncertain history explicitly; do not rewrite it as fact.
+4. Repair tracker or handoff metadata only when evidence is sufficient.
+5. Confirm pre-existing unrelated changes were not absorbed into story commits.
+6. If ambiguity affects scope, intent, or code ownership, stop and ask one focused question.
 
-## Metadata
+## Close
 
-- Generated at (UTC): <timestamp>
-- Current HEAD: <full-or-short-sha>
-- Previous handoff HEAD: <sha or none>
-- Stale context detected: <yes/no>
+Only after the tracker story is `done` and validation passes:
 
-## Next-session focus
+- set phase `done`;
+- update final HEAD and summary;
+- record whether the workspace is clean or unrelated baseline changes remain preserved;
+- copy the handoff to `.scratch/<increment>/handoffs/<story-id>.md`;
+- remove `.scratch/handoff-context.md`.
 
-<derived from /handoff arguments if provided>
+## Discard
 
-## Current status
+Require explicit user confirmation. Discarding recovery state must never change tracker status, reset code, or remove commits automatically.
 
-<brief snapshot of where the workflow currently is>
+## Staleness
 
-## Open decisions and blockers
-
-- ...
-
-## Suggested next actions
-
-1. ...
-2. ...
-
-## Suggested skills
-
-- /create-prd
-- /create-backlog
-- /implement
-- /review
-
-## References
-
-- <paths to PRD, issues, tracker, ADRs, relevant commits>
-```
+Equal HEAD is current. An ancestor may be refreshable after inspecting intervening commits. Non-ancestor history is divergent and requires reconciliation.

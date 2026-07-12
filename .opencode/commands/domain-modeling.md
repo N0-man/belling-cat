@@ -1,15 +1,10 @@
 ---
-description: Build and sharpen the project's domain model
+description: Clarify ubiquitous language, ownership, and module boundaries when that improves the design
 agent: plan
-subtask: true
 ---
 
-Use the `/domain-modeling` skill to actively build and sharpen the project's domain model.
+Use the `domain-modeling` skill.
 
-- Challenge fuzzy or overloaded terms
-- Update CONTEXT.md inline as terms are resolved (glossary only, no implementation details)
-- Cross-reference with existing code
-- Create ADRs sparingly — only when hard to reverse, surprising, and the result of real trade-offs
-- Create files lazily (CONTEXT.md and docs/adr/) only when needed
+Apply DDD concepts pragmatically. Do not force tactical classifications, aggregates, bounded contexts, or layers where plain language and simple code are clearer. Use `/record-decision` for technical and architecture choices.
 
 $ARGUMENTS

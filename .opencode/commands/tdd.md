@@ -1,23 +1,10 @@
 ---
-description: Test-driven development using tracer bullet approach
+description: Run one scoped test-driven Red-Green-Refactor cycle at a time
 agent: build
-subtask: true
 ---
 
-Use the `/tdd` skill for test-driven development.
+Use the `tdd` skill and respect the `scope-guard` baseline. When an active handoff exists, checkpoint RED, GREEN, REFACTOR, verification, scope, and commit evidence for each behavioural test or approved repair.
 
-Core principles:
-- Tests verify behavior through public interfaces, not implementation details
-- ONE test at a time — tracer bullet approach (RED → GREEN → repeat)
-- NO horizontal slicing — never write all tests first, then all code
-- Only refactor after GREEN, never while RED
-
-Workflow:
-1. Plan: Confirm interface changes and which behaviors to test
-2. Tracer bullet: Write ONE test → minimal code to pass
-3. Incremental loop: For each remaining behavior, write next test → minimal code
-4. Refactor: Extract duplication, deepen modules, apply SOLID (only after GREEN)
-
-Read CONTEXT.md (if it exists) so test names match domain language.
+Arguments: next behaviour, finding ID, or test target.
 
 $ARGUMENTS

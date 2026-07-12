@@ -8,6 +8,14 @@
         "edit": "allow",
         "bash": {
           "*": "allow"
+        },
+        "task": {
+          "*": "deny",
+          "standards-reviewer": "allow",
+          "spec-reviewer": "allow",
+          "architecture-reviewer": "allow",
+          "code-auditor": "allow",
+          "traceability-auditor": "allow"
         }
       }
     },
@@ -18,19 +26,8 @@
         "edit": "allow",
         "bash": {
           "*": "allow"
-        }
-      }
-    },
-    "code-reviewer": {
-      "description": "Reviews code for best practices and potential issues",
-      "mode": "subagent",
-      "model": "github-copilot/claude-sonnet-4.5",
-      "prompt": "You are a code reviewer. Focus on security, performance, and maintainability.",
-      "permission": {
-        "edit": "deny",
-        "bash": {
-          "*": "allow"
-        }
+        },
+        "task": "deny"
       }
     }
   },
@@ -43,8 +40,10 @@
     "edit": "ask",
     "todowrite": "allow",
     "webfetch": "deny",
+    "websearch": "deny",
     "lsp": "allow",
-    "task": "allow",
+    "question": "allow",
+    "task": "ask",
     "skill": {
       "*": "allow"
     },
@@ -53,11 +52,19 @@
       "git status*": "allow",
       "git diff*": "allow",
       "git log*": "allow",
+      "git show*": "allow",
       "git rev-parse*": "allow",
+      "git merge-base*": "allow",
       "make test": "allow",
       "make lint": "allow",
+      "make lint-fix": "allow",
+      "make format": "allow",
+      "make format-check": "allow",
       "make typecheck": "allow",
-      "make eval": "allow"
+      "make preflight": "allow",
+      "make eval": "allow",
+      "make workflow-lint": "allow",
+      "python scripts/validate_agent_workflow.py*": "allow"
     }
   }
 }

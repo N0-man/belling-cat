@@ -4,34 +4,34 @@ A terminal-based fact-checking application that investigates user-submitted clai
 
 ## Language
 
-**Claim** _(Aggregate Root)_:
-A factual assertion submitted by the user for investigation. The aggregate root that owns the investigation lifecycle and all associated findings. Example: "elephant was seen flying near Changi Airport yesterday".
-_Avoid_: Query, assertion, statement, hypothesis
+**Claim**:
+A factual assertion submitted by the user for investigation. A Claim is the immutable subject of an Investigation.
+_Avoid_: Query, statement, hypothesis
 
-**Sub-claim** _(Value Object)_:
-A discrete, independently verifiable component extracted from a Claim during decomposition. Immutable once created. Example: from the claim above, sub-claims might be "elephant", "flying", "Changi Airport", "yesterday".
-_Avoid_: Claim fragment, sub-assertion, component claim
+**Sub-claim**:
+A discrete factual assertion derived from a Claim that can be investigated independently. Example: “An elephant was present near Changi Airport yesterday” and “The elephant was observed flying.”
+_Avoid_: Keyword, claim fragment, search term
 
-**Investigation** _(Aggregate Root)_:
-The complete fact-checking process and its accumulated state for a single Claim, including all findings, evidence, and the final verdict. Has identity and lifecycle (in-progress → complete).
-_Avoid_: Session, verification process, fact-check
+**Investigation** _(Aggregate Root, where this classification is useful)_:
+The fact-checking process and accumulated state for one Claim. It owns the lifecycle from in-progress to complete and coordinates Findings, Evidence, and the final Verdict.
+_Avoid_: Session, generic workflow, fact-check result
 
-**Finding** _(Value Object)_:
-An intermediate discovery or progress update logged during an investigation. Immutable records streamed to the user in real-time. Example: "Searching for elephant sightings...", "Found 3 relevant news articles...".
-_Avoid_: Log entry, progress update, intermediate result
+**Finding**:
+An immutable intermediate observation produced during an Investigation, such as a search step completed or relevant material discovered.
+_Avoid_: Debug log, final evidence, verdict
 
-**Evidence** _(Value Object)_:
-A sourced fact discovered during investigation, including the content, source reference, credibility assessment, and timestamp. More structured than a Finding.
-_Avoid_: Fact, source data, finding
+**Evidence**:
+A sourced fact used to evaluate a Sub-claim, including its content, Source, credibility assessment, and relevant timestamp.
+_Avoid_: Finding, unsourced assertion, raw search result
 
-**Source** _(Value Object)_:
-An information origin with credibility attributes (URL, authority level, publication date). Authority hierarchy: government > academic > established news > other.
-_Avoid_: Reference, link, citation
+**Source**:
+The origin of Evidence, including provenance such as URL, publisher or authority, and publication date. Credibility is assessed in context rather than inferred from a fixed label alone.
+_Avoid_: Citation text, evidence, finding
 
-**Verdict** _(Value Object)_:
-The final categorization of a claim's veracity: "Supported" (authoritative sources agree), "Contradicted" (sources directly refute it), or "Unsupported" (insufficient authoritative evidence).
-_Avoid_: Result, conclusion, determination, judgment
+**Verdict**:
+The final assessment of a Claim or Sub-claim: **Supported**, **Contradicted**, or **Unsupported**. Unsupported means authoritative evidence is insufficient; it does not mean the assertion is proven false.
+_Avoid_: Result, judgment without evidence, confidence score
 
 **Report** _(Read Model)_:
-A Markdown file projection of a completed Investigation, saved to disk for archival. Contains metadata, findings log, and verdict. Not a domain entity - it's a persistence artifact.
-_Avoid_: Output, summary, investigation file
+A Markdown projection of a completed Investigation for sharing or archival. It contains investigation metadata, Findings, Evidence, and Verdicts but is not itself a domain entity.
+_Avoid_: Investigation, raw output, session file

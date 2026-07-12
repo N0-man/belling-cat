@@ -1,126 +1,119 @@
-# AGENTS.md
+# Agent workflow contract
 
-## Agent instructions
+This repository is developed with OpenCode. Keep this file concise: detailed procedures live in `.opencode/skills/`, while `README.md` is the human guide.
 
-This repository is intended to be developed by opencode agents. Treat this file as the primary,tool-agnostic contract for coding agents.
+## Core workflow
 
-## Workflow
+Behaviour-changing work follows:
 
-`/discover` scopes requirements — one or more features may emerge. Each feature then follows the full pipeline:
-
-```
-/discover → /create-prd → /create-backlog → [per backlog item: /implement → /review → /commit]
+```text
+/discover -> /create-prd -> /create-backlog -> /implement
 ```
 
-Run `/create-prd` once per feature. The phases after discovery are sequential — do not skip them.
+One discovery interaction normally defines one MVP increment and may produce several stories. Run `/implement` one story at a time until the backlog is complete.
 
-**One backlog item at a time.** Each backlog item is a vertical slice cutting through all layers.
+Unplanned structural work follows:
 
-## Handoff
-
-- `/handoff` writes `.scratch/handoff-context.md` for next-session continuation
-- The handoff file is overwritten on every `/handoff` invocation
-- Handoff metadata must include current commit hash and UTC timestamp
-- If existing handoff commit differs from current `HEAD`, mark stale context in the new handoff
-
-## Core Rules
-
-- **Human owns:** product intent, architecture approval, merge decision
-- **Agent may:** explore, plan, implement an approved issue, test, review
-- **Agent must not:** invent scope, add unapproved dependencies, refactor unrelated files
-
-## Local Skills & Commands
-
-Skills live in `.opencode/skills/`, invoked via thin commands in `.opencode/commands/`:
-
-| Command            | Skill             | Purpose                                                                         |
-| ------------------ | ----------------- | ------------------------------------------------------------------------------- |
-| `/discover`        | `discover`        | Discover requirements through relentless interview, capturing glossary and ADRs |
-| `/grilling`        | `grilling`        | Socratic questioning to clarify scope                                           |
-| `/domain-modeling` | `domain-modeling` | Maintain glossary (`CONTEXT.md`) and ADRs (`docs/adr/`)                         |
-| `/create-prd`      | `create-prd`      | Synthesize conversation into PRD at `.scratch/<feature-name>/PRD.md`            |
-| `/create-backlog`  | `create-backlog`  | Break PRD into backlog items under `.scratch/<feature-name>/backlog/`           |
-| `/handoff`         | `handoff`         | Write `.scratch/handoff-context.md` mapped to current commit                    |
-| `/tdd`             | `tdd`             | One test → minimal code → pass → next test (never all tests first)              |
-| `/implement`       | (composite)       | Implement a single backlog item using TDD + self-review                         |
-| `/review`          | `review`          | Three-axis review (Standards + Spec + Arechitecture) using parallel sub-agents                   |
-| `/commit`          | `commit`          | Commit the current reviewed changes                                             |
-| `/lint`            | `lint`            | Auto-fix lint and formatting (Python + frontend), then confirm workspace is clean |
-| `/test-affected`   | `test-affected`   | Find and run tests affected by current changes (optional file path args)        |
-| `/preflight`       | `preflight`       | Run full CI-equivalent checks (lint, format, tests, coverage) before pushing   |
-
-Skills create files lazily. Do not pre-create `.scratch/`, `docs/`, or implementation directories.
-
-## Permission Model
-
-`opencode.json` enforces:
-
-- `edit: ask` — agent must request permission for file changes
-- `bash: ask` (except whitelisted git + make commands)
-- `webfetch: deny`
-
-Relax `edit` to `allow` only during focused `/implement` sessions, then revert.
-
-## Backlog Tracker
-
-Local markdown under `.scratch/<feature-name>/`. Each backlog item file:
-
-- What to build (end-to-end behavior, not layer-by-layer)
-- Acceptance criteria
-- `Blocked by:` line for dependencies
-- `Status:` field using `to-do`, `doing`, or `done`
-
-`.scratch/<feature-name>/backlog.md` is the primary tracker for backlog items in that feature/PRD
-
-## Repo Structure
-
-repo structure instruction is in `docs/00-repo-structure.md`
-
-## Domain Model
-
-- `CONTEXT.md` — glossary only, maintained by `domain-modeling` skill
-- `docs/adr/` — architecture decisions for hard/surprising trade-offs only
-
-## Commands
-
-The repo has **no Makefile yet**. Build commands will emerge after implementation starts. The playbook (`Opencode_NLQ.md`) mentions:
-
-```
-make test       — run the test suite
-make lint       — run linter
-make typecheck  — run type checker
-make eval       — run golden evals
+```text
+/audit -> /refactor
 ```
 
-These are **forward references** — they don't exist until implementation creates them.
+Use `/validate` to gate an already committed range outside the normal story flow.
 
-## TDD Discipline
+## Ownership
 
-From `tdd/SKILL.md`:
+- **Human:** product intent, scope approval, material architecture and dependency choices, accepted risk, push/merge decisions.
+- **Primary agent:** inspect, question, document accepted decisions, plan, implement one ready story, test, review, validate, and commit focused verified cycles.
+- **Review subagents:** read-only analysis only.
 
-- **One test at a time** — tracer bullet approach (RED → GREEN → repeat)
-- **No horizontal slicing** — never write all tests first, then all code
-- Tests verify behavior through **public interfaces**, not implementation details
-- Only refactor after GREEN, never while RED
+Never invent scope, silently choose a material alternative, absorb unrelated workspace changes, bypass tests/hooks, rewrite away earlier repair commits, or mark incomplete work done.
 
-## Review Process
+## Artifact ownership
 
-From `review/SKILL.md`:
+| Artifact | Owns |
+|---|---|
+| `CONTEXT.md` | Useful business language and responsibility definitions |
+| `docs/00-repo-structure.md` | Current module ownership and dependency rules |
+| `docs/design/<increment>.md` | Reversible increment-level design decisions |
+| `docs/adr/NNNN-*.md` | Cross-cutting, long-lived, costly, or surprising architecture decisions |
+| `.scratch/<increment>/PRD.md` | Product outcome, behaviour, constraints, and acceptance evidence |
+| `.scratch/<increment>/backlog.md` | Story order, status, and blockers |
+| `.scratch/<increment>/backlog/NN-*.md` | Story intent, value, scope, criteria, and evidence |
+| `.scratch/handoff-context.md` | Active story, scope baseline, exact cycle/phase, commits, findings, and validation state |
+| `Makefile` or CI | Executable verification commands |
 
-Sub-agent selection conventions: `docs/agents/subagent-conventions.md`
+Use one primary owner per durable fact and link from other artifacts rather than copying full rationale. `.scratch/` is local workflow state; durable decisions live under `docs/`.
 
-Two parallel sub-agents report separately:
+## Discovery and planning
 
-- **Standards** — does the code follow documented coding standards?
-- **Spec** — does the code match the originating issue/PRD?
+- Every product feature or behaviour change starts with `/discover`.
+- Ask exactly one question at a time and inspect the repository before asking codebase-answerable questions.
+- Record accepted technical choices in a design record or ADR; do not leave them only in chat or bury them only in the PRD.
+- Apply DDD and Clean Architecture pragmatically. Use them when they clarify language, ownership, dependency direction, or testability—not as mandatory ceremony.
+- Stories use INVEST as a heuristic and must demonstrate useful value. A strict vertical slice is not required; a technical enabler is valid when it unlocks, de-risks, or proves a meaningful capability.
 
-A change can pass one axis and fail the other — they are not merged or reranked.
+## State and recovery
 
-## Key notes
+The backlog tracker and handoff are always read together:
 
-- `.scratch/` is the local backlog root — skills create it, not you
-- Backlog scope is per feature: `.scratch/<feature-name>/backlog.md`
-- `CONTEXT.md` lives at repo root, not in `docs/`
-- ADRs only for **hard, surprising, trade-off decisions** — not every architectural choice
-- PRD sections are auto-generated by `/create-prd` skill using a canonical template
-- Commit messages reference backlog item numbers (e.g., `Item 01: Add end-to-end mocked NLQ query flow`)
+1. One `doing` story plus matching handoff: resume the exact phase.
+2. One `doing` story without handoff: reconstruct cautiously in `reconcile` phase.
+3. Handoff and tracker disagree: reconcile before changing production code.
+4. No active story or handoff: select the requested or next ready `to-do` story.
+5. More than one `doing` story: invalid state; repair the tracker first.
+
+The tracker owns story lifecycle (`to-do`, `doing`, `done`). The handoff owns execution detail. Never overwrite or discard recovery history implicitly.
+
+## Implementation rules
+
+Before changes, capture HEAD and all staged, modified, and untracked files with `scope-guard`. Preserve unrelated work and stage explicit intended files only.
+
+Each behaviour or executable repair follows:
+
+```text
+RED -> GREEN -> REFACTOR -> VERIFY -> COMMIT
+```
+
+- One behaviour at a time.
+- Observe the intended RED or a credible safety signal for a pure refactor.
+- Refactor only while green.
+- Commit every complete green cycle; never commit RED separately.
+- Keep earlier cycle and repair commits.
+- Record each phase and commit in the handoff.
+
+Before final validation, record candidate acceptance and demonstration evidence in the story file while the tracker remains `doing`.
+
+## Review and validation
+
+Review the exact committed range recorded in the handoff:
+
+```text
+story_base_sha..HEAD
+```
+
+Do not guess `main`, `HEAD~1`, or a branch-based fixed point.
+
+Every finding receives a severity and one action:
+
+- `repair` — clearly inside approved intent;
+- `ask-user` — changes behaviour, scope, contract, dependency, material architecture, or risk acceptance;
+- `record-decision` — approved rationale is missing or stale;
+- `no-op` — accepted trade-off or observation.
+
+Repairs are additive focused commits followed by re-review. Preflight is non-mutating and uses repository-owned commands.
+
+## Completion
+
+A story moves to `done` only when:
+
+- acceptance criteria and demo evidence are recorded and verified;
+- all cycles and repairs are committed and green;
+- no blocking/major or unanswered user finding remains;
+- decision and documentation ownership is current;
+- preflight passes without changing tracked files;
+- unrelated baseline changes remain preserved;
+- the handoff is finalized and archived.
+
+## Permissions
+
+`plan` intentionally has edit and bash access because discovery and planning create PRDs, backlogs, context, design records, and ADRs. `build` has edit/bash access and may invoke only the configured internal review/audit subagents. Those subagents are hidden and read-only.

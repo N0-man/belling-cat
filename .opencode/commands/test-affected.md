@@ -1,12 +1,10 @@
 ---
-description: Find and run tests affected by recent changes
+description: Run tests affected by paths or by changes since a fixed commit
 agent: build
-subtask: true
 ---
 
-Use the `/test-affected` skill to find and run only the tests touched by current changes.
+Use the `test-affected` skill.
 
-Arguments: optional file path(s) to scope the affected-test search
+Arguments: optional paths or `--since <commit>`. During story implementation, default to the active handoff's story base SHA rather than only uncommitted changes.
 
 $ARGUMENTS
-

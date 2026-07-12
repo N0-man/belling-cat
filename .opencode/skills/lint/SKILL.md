@@ -1,33 +1,41 @@
 ---
 name: lint
-description: Auto-fix lint and formatting issues for Python and frontend
-disable-model-invocation: true
+description: Run repository-native lint and formatting checks by default, or apply explicitly authorized scoped fixes with --fix.
+compatibility: opencode
+metadata:
+  workflow: verification
 ---
 
-# /lint
+# Lint and Format
 
-Run auto-fix linting and formatting across Python and frontend, then show what changed.
+Inspect `Makefile`, task-runner files, package manifests, and CI configuration. Do not assume a language or framework that the repository does not use.
 
-## Steps
+## Default check mode
 
-1. Run `make lint-fix` (covers Python via ruff):
-   ```bash
-   make lint-fix
-   ```
+Without `--fix`, run non-mutating lint and format checks, preferring:
 
-2. Run frontend lint auto-fix:
-   ```bash
-   cd frontend && npx next lint --fix > /tmp/frontend-lint.txt 2>&1; echo "EXIT CODE: $?" >> /tmp/frontend-lint.txt
-   ```
+```bash
+make lint
+make format-check
+```
 
-3. Verify Python formatting is clean:
-   ```bash
-   make format-check > /tmp/format-check.txt 2>&1; echo "EXIT CODE: $?" >> /tmp/format-check.txt
-   ```
+Report commands, exit status, and concise failures. Do not edit files.
 
-4. Show what files changed:
-   ```bash
-   git diff --stat
-   ```
+## Explicit fix mode
 
-5. Report remaining issues for any check that still fails. Otherwise confirm all clean.
+Only use fix mode when the user passes `--fix` or an active repair workflow explicitly authorizes it.
+
+1. Invoke the `scope-guard` skill.
+2. Resolve explicit paths from arguments or the active story scope.
+3. Prefer repository targets such as:
+
+```bash
+make lint-fix PATHS="<explicit paths>"
+make format PATHS="<explicit paths>"
+```
+
+4. Never run a repository-wide style sweep while unrelated baseline changes exist unless the user explicitly requests it.
+5. Re-run non-mutating checks for the same scope.
+6. Show changed paths and `git diff --stat`; report remaining failures.
+
+`/preflight` must never use fix mode.

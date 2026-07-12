@@ -1,42 +1,35 @@
 ---
 name: commit
-description: Create a single commit from the current reviewed changes.
-argument-hint: "Commit message (optional)."
-disable-model-invocation: true
+description: Create one focused, verified commit for a completed green TDD, refactoring, or documentation repair cycle without staging unrelated or sensitive files.
+compatibility: opencode
+metadata:
+  workflow: version-control
 ---
 
-# Commit
+# Commit One Focused Cycle
 
-Create one commit for the current reviewed changes.
+## Preconditions
+
+- active cycle phase is VERIFY, or the change is an explicitly verified documentation/decision repair;
+- focused and affected checks passed;
+- intended file set is known;
+- `scope-guard` baseline exists or has just been established;
+- unrelated workspace changes are identified and excluded.
+
+Do not run full preflight for every cycle unless required by the repository; full preflight is mandatory at story/refactor completion.
 
 ## Process
 
-1. Confirm scope
+1. Inspect `git status --short`, relevant diffs, and staged state.
+2. Abort if secrets, credentials, certificates, private keys, local environment files, generated bulk artifacts, or unexplained files are in scope.
+3. Stage specific intended paths only. Broad all-workspace staging is prohibited.
+4. Inspect `git diff --cached` and confirm it represents one complete green or documentation repair cycle.
+5. Derive the message from active work unless explicitly supplied:
+   - `ITEM-03 Cycle 02: reject an empty claim`
+   - `REFACTOR-AUD-004 Cycle 01: isolate search adapter`
+   - `ITEM-03 Docs: synchronize investigation guidance`
+6. Commit without amend, force, or hook bypass.
+7. Report SHA, title, and files; update the handoff COMMITTED checkpoint after the commit.
+8. Recheck the scope baseline and confirm unrelated changes remain outside the commit.
 
-- Use `git status --short` and `git diff --stat` to confirm what will be committed.
-- If unrelated changes are present, ask the user whether to exclude them before committing.
-
-2. Build commit message
-
-- If the user passed a message argument, use it.
-- Otherwise derive a concise message from the reviewed issue/slice.
-- Prefer issue-linked format when available: `Issue NN: <concise summary>`.
-
-3. Stage and commit
-
-- Stage only the intended files for this change.
-- Create a single non-amended commit with the message from step 2.
-
-4. Report result
-
-- Return commit hash, title line, and changed files summary.
-
-## Rules
-
-- Do not amend previous commits unless explicitly requested.
-- Do not include unrelated files without user confirmation.
-- Do not push.
-- Never use `git add -A` or `git add .` — stage specific files only.
-- Never use `--no-verify`.
-- Never commit `.env`, keys, credentials, tokens, certs, or secrets — abort if any staged file contains them.
-- Run `/preflight` (or at minimum `/test-affected`) before committing unless the user explicitly overrides.
+Do not push.
