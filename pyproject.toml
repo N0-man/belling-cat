@@ -3,7 +3,7 @@ name = "belling-cat"
 version = "0.1.0"
 description = "A terminal-based fact-checking application using multi-agent LLM architecture"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12, <3.14"
 dependencies = [
     "rich>=13.7.0",
     "yachalk>=0.1.5",

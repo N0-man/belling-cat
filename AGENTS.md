@@ -30,17 +30,17 @@ Never invent scope, silently choose a material alternative, absorb unrelated wor
 
 ## Artifact ownership
 
-| Artifact | Owns |
-|---|---|
-| `CONTEXT.md` | Useful business language and responsibility definitions |
-| `docs/00-repo-structure.md` | Current module ownership and dependency rules |
-| `docs/design/<increment>.md` | Reversible increment-level design decisions |
-| `docs/adr/NNNN-*.md` | Cross-cutting, long-lived, costly, or surprising architecture decisions |
-| `.scratch/<increment>/PRD.md` | Product outcome, behaviour, constraints, and acceptance evidence |
-| `.scratch/<increment>/backlog.md` | Story order, status, and blockers |
-| `.scratch/<increment>/backlog/NN-*.md` | Story intent, value, scope, criteria, and evidence |
-| `.scratch/handoff-context.md` | Active story, scope baseline, exact cycle/phase, commits, findings, and validation state |
-| `Makefile` or CI | Executable verification commands |
+| Artifact                               | Owns                                                                                     |
+| -------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `CONTEXT.md`                           | Useful business language and responsibility definitions                                  |
+| `docs/00-repo-structure.md`            | Current module ownership and dependency rules                                            |
+| `docs/design/<increment>.md`           | Reversible increment-level design decisions                                              |
+| `docs/adr/NNNN-*.md`                   | Cross-cutting, long-lived, costly, or surprising architecture decisions                  |
+| `.scratch/<increment>/PRD.md`          | Product outcome, behaviour, constraints, and acceptance evidence                         |
+| `.scratch/<increment>/backlog.md`      | Story order, status, and blockers                                                        |
+| `.scratch/<increment>/backlog/NN-*.md` | Story intent, value, scope, criteria, and evidence                                       |
+| `.scratch/handoff-context.md`          | Active story, scope baseline, exact cycle/phase, commits, findings, and validation state |
+| `Makefile` or CI                       | Executable verification commands                                                         |
 
 Use one primary owner per durable fact and link from other artifacts rather than copying full rationale. `.scratch/` is local workflow state; durable decisions live under `docs/`.
 
@@ -117,3 +117,7 @@ A story moves to `done` only when:
 ## Permissions
 
 `plan` intentionally has edit and bash access because discovery and planning create PRDs, backlogs, context, design records, and ADRs. `build` has edit/bash access and may invoke only the configured internal review/audit subagents. Those subagents are hidden and read-only.
+
+## Important rules to follow
+
+- Do not provide time, effort, completion-date, or story-point estimates unless the user explicitly requests an estimate

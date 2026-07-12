@@ -1,28 +1,53 @@
-# Increment design record format
+# Design decision format
 
-Design records live at `docs/design/<increment>.md` and contain multiple lightweight decisions.
+Design decisions live in `docs/design/NNNN-<slug>.md`. Each file records exactly one accepted, local or reasonably reversible design choice.
+
+## Required structure
 
 ```md
-# <Increment> Design Decisions
+# <Decision title>
 
-## DD-001: <Decision title>
+**Status:** Accepted
+**Related PRD:** `.scratch/<increment>/PRD.md`
+**Related stories:** `ITEM-01` <!-- optional metadata; omit when not useful -->
 
-**Status:** proposed | accepted | deferred | superseded
-**Related requirements/stories:** REQ-001, ITEM-02
+## Decision
 
-### Context
+<What was explicitly agreed.>
 
-### Decision
+## Why
 
-### Rationale
-
-### Consequences
-
-### Alternatives considered
-
-### Superseded by
-
-Omit when not applicable.
+<Why it was explicitly chosen.>
 ```
 
-Keep decisions concise and independently referenceable. Do not copy full PRD requirements into the design record.
+This is the complete default record. Do not add more sections for completeness.
+
+## Optional blocks
+
+Append **Considered options** only when the options were actually discussed with or presented to the user:
+
+```md
+## Considered options
+
+- <Option actually discussed>
+- <Option actually discussed>
+```
+
+Append **Consequences** only when the consequences were explicitly acknowledged or accepted by the user:
+
+```md
+## Consequences
+
+- <Consequence explicitly accepted>
+```
+
+Do not infer alternatives, pros/cons, trade-offs, or consequences from code, conventions, or general best practice.
+
+Optional lifecycle metadata may be added when applicable:
+
+```md
+**Supersedes:** `docs/design/0001-<slug>.md`
+**Superseded by:** `docs/design/0003-<slug>.md`
+```
+
+Do not combine several decisions into one increment-level document. The related PRD links the individual decision files relevant to the increment.

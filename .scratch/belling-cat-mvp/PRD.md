@@ -68,7 +68,6 @@ Technical implementation decisions have been extracted to dedicated decision rec
 Cross-cutting, long-lived decisions affecting multiple modules:
 
 - **[ADR-0001: Multi-Agent Architecture with LangGraph](../../docs/adr/0001-multi-agent-architecture-with-langgraph.md)** - Workflow orchestration strategy
-- **[ADR-0002: Three-Tier LLM Model Strategy](../../docs/adr/0002-three-tier-llm-model-strategy.md)** - Model selection per agent
 - **[ADR-0003: LLM Provider and Web Search Integration](../../docs/adr/0003-llm-provider-web-search-integration.md)** - OpenAI as LLM provider
 - **[ADR-0004: Session Persistence and Recovery Strategy](../../docs/adr/0004-session-persistence-recovery.md)** - File-based state management
 
@@ -76,42 +75,12 @@ Cross-cutting, long-lived decisions affecting multiple modules:
 
 Local, reversible decisions specific to this MVP:
 
-- **[Belling Cat MVP Design Decisions](../../docs/design/belling-cat-mvp.md)**
-  - DD-001: Terminal UI Framework Selection (Rich + Yachalk)
-  - DD-002: Report Format and Storage (Markdown in `.reports/`)
-  - DD-003: Command Routing and State Machine (Simple dispatch)
-  - DD-004: Verification Strategy (LLM-based credibility, evidence association, confidence)
+- **[DD-001: Terminal UI Framework Selection](../../docs/design/0001-terminal-ui-framework.md)** - Rich + Yachalk for terminal output
+- **[DD-002: Report Format and Storage](../../docs/design/0002-report-format-storage.md)** - Markdown files in `.reports/`
+- **[DD-003: Command Routing and State Machine](../../docs/design/0003-command-routing-state-machine.md)** - Simple dispatch with linear state machine
+- **[DD-004: Verification Strategy](../../docs/design/0004-verification-strategy.md)** - LLM-based credibility, evidence association, confidence
 
-## Testing Decisions
 
-### Testing Approach: Workflow Integration Seam
-
-Tests should verify the complete `/investigate` command flow end-to-end without mocking internal agent logic:
-
-- **Input**: User provides `/investigate <claim>` via CLI
-- **Output**: Streamed real-time findings to terminal + final Markdown report file
-- **Seam level**: CLI interface → workflow orchestration → file output (highest-level integration point)
-
-### What Makes a Good Test
-- Tests should verify **external behavior only**: claims submitted, real-time findings displayed, reports saved with expected structure
-- Tests should NOT verify implementation details like exact agent call order, LLM prompt wording, or internal state
-- Tests should use realistic test data: actual news stories or well-known events that can be fact-checked
-
-### Modules to Test
-- **CLI interface**: Command parsing, error handling for invalid inputs, routing to investigation workflow
-- **LangGraph workflow**: Full orchestration from claim submission to verdict generation (with mocked LLM responses using deterministic fixtures)
-- **Report generation**: Markdown output format, metadata accuracy, file persistence
-- **Real-time output streaming**: Intermediate findings appear in order, formatting is readable
-
-### Test Data & Fixtures
-- Mock LLM responses representing typical findings (supported claims, contradicted claims, unsupported claims)
-- Fixture claims: a mix of verifiable facts (easily supported), false claims (contradicted by sources), and ambiguous claims (unsupported)
-- Pre-recorded web search results to avoid actual API calls during testing
-
-### Prior Art
-- Similar integration tests in Python projects often use `pytest` with fixtures and parametrization
-- Terminal output testing can use `pytest-caplog` or Rich's built-in `Console` with `record=True` to capture output
-- File I/O testing uses temporary directories (`pytest.TempPathFactory` or `tmpdir`)
 
 ## Out of Scope
 

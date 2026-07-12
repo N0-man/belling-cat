@@ -1,12 +1,16 @@
 ---
-description: Classify and record an accepted product, design, architecture, or repository decision
+description: Extract or record explicitly accepted decisions from traceable evidence, one file per decision
 agent: plan
 ---
 
 Use the `decision-recording` skill.
 
-Classify the decision before writing: product requirement, increment design decision, ADR, repository structure rule, open decision, or routine implementation detail that needs no record. Move rationale out of the PRD when a durable design or ADR record is more appropriate, then leave a reference in the PRD.
+Treat the argument as source material, not permission to infer missing decisions.
 
-Arguments: decision text, source path, or increment name.
+For multiple candidates, classify each as `READY`, `NEEDS CONFIRMATION`, or `NOT A DECISION`. Create files only for `READY` candidates whose decision, reason, and acceptance are all explicitly supported. Ask one focused question for the first blocking candidate. Do not manufacture rationale, alternatives, pros/cons, consequences, scope, tools, or acceptance to complete the task.
+
+Record one atomic decision per file and reference the related PRD.
+
+Arguments: explicit decision text, source path, audit finding, or increment name.
 
 $ARGUMENTS

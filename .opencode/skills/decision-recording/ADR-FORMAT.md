@@ -1,38 +1,53 @@
 # ADR format
 
-ADRs live in `docs/adr/NNNN-<slug>.md` and are created lazily.
+ADRs live in `docs/adr/NNNN-<slug>.md`. Each file records exactly one accepted architecture decision.
+
+## Required structure
 
 ```md
----
-status: proposed | accepted | deprecated | superseded
-increment: <increment name when applicable>
-related_decisions:
-  - DD-001
----
-
 # <Decision title>
 
-## Context
+**Status:** Accepted
+**Related PRD:** [<increment>](link to `.scratch/<increment>/PRD.md`)
+**Related stories:** `ITEM-01` <!-- optional metadata; omit when not useful -->
 
 ## Decision
 
-## Rationale
+<What was explicitly agreed.>
 
-## Consequences
+## Why
 
-## Considered alternatives
-
-## Superseded by
-
-Omit when not applicable.
+<Why it was explicitly chosen.>
 ```
 
-Create an ADR when one or more of these are materially true:
+This is the complete default record. Do not add more sections for completeness.
 
-- the decision affects several modules, increments, or teams;
-- reversal would be expensive, risky, or migration-heavy;
-- the choice is long-lived or constrains future architecture;
-- the decision is surprising without its trade-off rationale;
-- several credible alternatives existed with meaningful consequences.
+## Optional blocks
 
-Routine library choices, local implementation details, and small reversible refactors belong in the increment design record or code—not an ADR.
+Append **Considered options** only when the options were actually discussed with or presented to the user:
+
+```md
+## Considered options
+
+- <Option actually discussed>
+- <Option actually discussed>
+```
+
+Append **Consequences** only when the consequences were explicitly acknowledged or accepted by the user:
+
+```md
+## Consequences
+
+- <Consequence explicitly accepted>
+```
+
+Do not infer alternatives, advantages, disadvantages, trade-offs, or consequences from general knowledge, code, or the selected technology.
+
+Optional lifecycle metadata may be added when applicable:
+
+```md
+**Supersedes:** `docs/adr/0001-<slug>.md`
+**Superseded by:** `docs/adr/0003-<slug>.md`
+```
+
+Create an ADR only for an accepted decision that is cross-cutting, long-lived, expensive to reverse, or materially affects future architecture. Routine and local choices belong in an individual design-decision file or require no durable record.
