@@ -59,46 +59,28 @@ A terminal-based fact-checking application called "Belling Cat" that accepts use
 30. GIVEN the user chooses to resume, WHEN the session is restored, THEN the investigation should continue from the last saved checkpoint without losing context
 31. GIVEN the user chooses not to resume, WHEN declined, THEN the system should archive the incomplete session and start fresh
 
-## Implementation Decisions
+## Decision References
 
-### Multi-Agent Architecture with LangGraph
-- Three specialized agents orchestrated via LangGraph, each with a distinct responsibility:
-  - **Claim Decomposition Agent**: Breaks complex claims into sub-claims using a fast LLM (GPT-4o mini) for cost/latency efficiency
-  - **Investigation/Fact Finder Agent**: Searches for evidence using mid-tier reasoning LLM (GPT-4 Turbo or equivalent) with web search capability
-  - **Verifier Agent**: Synthesizes findings and produces verdict using a strong reasoning model (GPT-4o) for nuanced credibility assessment
-- Each agent receives different LLM models optimized for its phase, balancing speed and reasoning capability
-- Agents may run in parallel where dependencies allow (e.g., fact-finding for multiple sub-claims)
+Technical implementation decisions have been extracted to dedicated decision records for better maintainability and traceability.
 
-### LLM Integration with Web Search
-- OpenAI Chat Completion API with built-in web search capability (or equivalent plugin like Tavily/Perplexity integration)
-- The LLM's web search is the primary investigative mechanism; no external search APIs required
-- Real-time search results are integrated into agent reasoning and returned with source citations
+### Architecture Decision Records (ADRs)
 
-### Terminal UI Framework
-- **Rich** library for structured terminal output (tables, panels, progress indicators, colors)
-- **Yachalk** for terminal color/styling primitives
-- ASCII art banner generated and cached at startup
-- Progress indicators and real-time streaming using Rich's Live Display functionality
+Cross-cutting, long-lived decisions affecting multiple modules:
 
-### Report Format & Storage
-- Reports saved as Markdown files in a `.reports/` directory with filename format: `belling-cat-{timestamp}.md`
-- Markdown structure:
-  - Metadata header (claim, timestamp, agents involved)
-  - Step-by-step findings section with real-time log entries
-  - Final verdict section categorizing each sub-claim
-  - Source citations inline where evidence is presented
+- **[ADR-0001: Multi-Agent Architecture with LangGraph](../../docs/adr/0001-multi-agent-architecture-with-langgraph.md)** - Workflow orchestration strategy
+- **[ADR-0002: Three-Tier LLM Model Strategy](../../docs/adr/0002-three-tier-llm-model-strategy.md)** - Model selection per agent
+- **[ADR-0003: LLM Provider and Web Search Integration](../../docs/adr/0003-llm-provider-web-search-integration.md)** - OpenAI as LLM provider
+- **[ADR-0004: Session Persistence and Recovery Strategy](../../docs/adr/0004-session-persistence-recovery.md)** - File-based state management
 
-### Command Routing
-- CLI entry point parses `/investigate <claim>` and `/save <report-name>` syntax
-- Invalid commands or unrecognized syntax returns helpful error guidance
-- Session state is simple: idle → investigating → displaying results → ready for new investigation
+### Increment Design Decisions
 
-### Session Persistence & Recovery
-- Session state continuously auto-saved to `.session/session-{id}-{timestamp}.json` (or pickle format for complex objects)
-- Persisted state includes: original claim, decomposed sub-claims, investigation findings (partial or complete), current agent/phase, streaming output buffer
-- On startup, detect incomplete sessions and prompt user to resume or archive
-- Recovery mechanism restores LangGraph workflow state and continues from last checkpoint
-- Completed sessions archived or cleaned up after successful report generation
+Local, reversible decisions specific to this MVP:
+
+- **[Belling Cat MVP Design Decisions](../../docs/design/belling-cat-mvp.md)**
+  - DD-001: Terminal UI Framework Selection (Rich + Yachalk)
+  - DD-002: Report Format and Storage (Markdown in `.reports/`)
+  - DD-003: Command Routing and State Machine (Simple dispatch)
+  - DD-004: Verification Strategy (LLM-based credibility, evidence association, confidence)
 
 ## Testing Decisions
 
